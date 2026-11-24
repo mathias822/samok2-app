@@ -1,0 +1,817 @@
+<title>Sideleser</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap">
+<style>
+/* Layout: én kolonne – opplasting/fremdrift øverst, sidekart, lesetekst, fast spiller nederst. */
+:root {
+  --bg: #f4f2ee;
+  --flate: #fffdf9;
+  --tekst: #1d1b18;
+  --dempet: #6d675e;
+  --linje: #e2ddd3;
+  --aksent: #1f5f8b;
+  --aksent-lys: #dcebf5;
+  --merke: #ffe39a;
+  --klar: #3f8f5f;
+  --jobber: #d29a2a;
+  --feil: #c2453a;
+  --venter: #d6d0c4;
+  --ui: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --les: 'Literata', Georgia, 'Times New Roman', serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171a; --flate: #1e2125; --tekst: #ece8e1; --dempet: #a39d93; --linje: #33373d;
+    --aksent: #7cb8e4; --aksent-lys: #1f3445; --merke: #5a4a1c; --klar: #5fb884; --jobber: #e0b04f;
+    --feil: #e3786d; --venter: #3d4248; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15171a; --flate: #1e2125; --tekst: #ece8e1; --dempet: #a39d93; --linje: #33373d;
+  --aksent: #7cb8e4; --aksent-lys: #1f3445; --merke: #5a4a1c; --klar: #5fb884; --jobber: #e0b04f;
+  --feil: #e3786d; --venter: #3d4248; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--tekst); font: 16px/1.5 var(--ui); }
+.ramme { max-width: 860px; margin: 0 auto; padding-block: 20px 200px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px; }
+h1 { font-size: 1.5rem; margin: 0; letter-spacing: -0.01em; }
+.topp { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.dempet { color: var(--dempet); }
+.liten { font-size: 0.88rem; }
+.kort { background: var(--flate); border: 1px solid var(--linje); border-radius: 14px; padding: 16px; min-width: 0; }
+button, select, input { font: inherit; color: inherit; }
+.knapp { border: 1px solid var(--linje); background: var(--flate); border-radius: 10px; padding: 8px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.knapp:hover { border-color: var(--aksent); }
+.knapp.hoved { background: var(--aksent); border-color: var(--aksent); color: var(--flate); font-weight: 700; }
+.knapp:disabled { opacity: 0.45; cursor: not-allowed; }
+:focus-visible { outline: 3px solid var(--aksent); outline-offset: 2px; }
+
+/* Opplasting */
+.slipp { display: grid; place-items: center; gap: 6px; text-align: center; padding: 40px 16px; border: 2px dashed var(--linje); border-radius: 14px; background: var(--flate); cursor: pointer; }
+.slipp.over, .slipp:hover { border-color: var(--aksent); background: var(--aksent-lys); }
+.slipp strong { font-size: 1.15rem; }
+.valg { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.valg label { display: flex; gap: 6px; align-items: center; }
+select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--linje); background: var(--flate); }
+
+/* Fremdrift og sidekart */
+.fremdrift { display: grid; gap: 10px; }
+.linjefrem { height: 8px; background: var(--venter); border-radius: 99px; overflow: hidden; }
+.linjefrem > div { height: 100%; background: var(--klar); width: 0; transition: width 0.3s; }
+.statusrad { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: center; }
+.sidekart { display: grid; grid-template-columns: repeat(auto-fill, minmax(16px, 1fr)); gap: 3px; }
+.celle { aspect-ratio: 1; border-radius: 3px; background: var(--venter); border: 0; padding: 0; cursor: pointer; max-width: 100%; }
+.celle.klar { background: var(--klar); opacity: 0.55; }
+.celle.jobber { background: var(--jobber); animation: puls 1.2s ease-in-out infinite; }
+.celle.feil { background: var(--feil); }
+.celle.uten { background: transparent; border: 1px dashed var(--dempet); }
+.celle.her { opacity: 1; outline: 2px solid var(--tekst); outline-offset: 1px; }
+@keyframes puls { 50% { opacity: 0.45; } }
+@media (prefers-reduced-motion: reduce) { .celle.jobber { animation: none; } }
+.forklaring { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.82rem; color: var(--dempet); }
+.forklaring span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
+.melding { padding: 10px 14px; border-radius: 10px; background: var(--aksent-lys); }
+.melding.feil { background: color-mix(in srgb, var(--feil) 18%, var(--flate)); }
+
+/* Lesetekst */
+.side-hode { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.side-hode h2 { font-size: 1rem; margin: 0; }
+.lesetekst { font-family: var(--les); font-size: 1.18rem; line-height: 1.75; max-width: 65ch; }
+.lesetekst p { margin: 0 0 0.9em; }
+.setning { cursor: pointer; border-radius: 4px; }
+.setning:hover { background: var(--aksent-lys); }
+.setning.na { background: var(--merke); box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.tom { font-family: var(--ui); color: var(--dempet); }
+
+/* Spiller */
+.spiller { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: var(--flate); border-top: 1px solid var(--linje); box-shadow: 0 -6px 24px rgba(0,0,0,0.08);
+  padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.spiller-inne { max-width: 860px; margin: 0 auto; display: grid; gap: 10px; }
+.kontroller { display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; }
+.kontroller .knapp { padding: 9px 13px; }
+.knapp svg { display: block; }
+.spill { width: 58px; height: 58px; border-radius: 50%; justify-content: center; font-size: 1.4rem; padding: 0 !important; }
+.fart { display: flex; align-items: center; gap: 10px; }
+.fart input[type=range] { flex: 1; min-width: 0; accent-color: var(--aksent); height: 28px; }
+.fartverdi { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.15rem; min-width: 3.6em; text-align: right; }
+.posisjon { text-align: center; font-size: 0.88rem; color: var(--dempet); font-variant-numeric: tabular-nums; }
+</style>
+
+<div class="ramme">
+  <div class="topp">
+    <h1>Sideleser</h1>
+    <div class="valg liten">
+      <label>Stemme <select id="stemme"></select></label>
+      <label>Tekstgjenkjenning
+        <select id="kvalitet">
+          <option value="default">Nøyaktig</option>
+          <option value="quick">Rask</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <label class="slipp" id="slipp" tabindex="0">
+    <input type="file" id="filer" accept="image/*" multiple hidden>
+    <strong id="slipp-tittel">Velg bildene av sidene</strong>
+    <span class="dempet">Du kan velge mange på en gang, for eksempel 300 bilder. Lesingen starter så snart første side er klar.</span>
+    <span class="dempet liten">Rekkefølge:
+      <select id="sortering" onclick="event.stopPropagation()">
+        <option value="navn">etter filnavn</option>
+        <option value="tid">etter når bildet ble tatt</option>
+        <option value="valgt">slik de ble valgt</option>
+      </select>
+    </span>
+  </label>
+
+  <div class="kort fremdrift" id="fremdrift" hidden>
+    <div class="statusrad">
+      <strong id="status-tekst">–</strong>
+      <span class="valg">
+        <button class="knapp liten" id="pause-gjenkjenning" type="button">Pause</button>
+        <button class="knapp liten" id="prov-igjen" type="button" hidden>Prøv mislykkede igjen</button>
+        <button class="knapp liten" id="nullstill" type="button">Start på nytt</button>
+      </span>
+    </div>
+    <div class="linjefrem"><div id="linjefrem"></div></div>
+    <div id="melding" class="melding" hidden></div>
+    <div class="sidekart" id="sidekart"></div>
+    <div class="forklaring">
+      <span style="--c: var(--klar)">tekst klar</span><span style="--c: var(--jobber)">gjøres om nå</span>
+      <span style="--c: var(--venter)">venter</span><span style="--c: var(--feil)">feilet</span>
+      <span>Trykk på en rute for å lese fra den siden</span>
+    </div>
+  </div>
+
+  <div class="kort" id="lesekort" hidden>
+    <div class="side-hode"><h2 id="side-tittel">–</h2><span class="dempet liten" id="side-navn"></span></div>
+    <div class="lesetekst" id="lesetekst"></div>
+  </div>
+</div>
+
+<div class="spiller" id="spiller" hidden>
+  <div class="spiller-inne">
+    <div class="kontroller">
+      <button class="knapp" id="forrige-side" type="button" title="Forrige side (Shift + ←)" aria-label="Forrige side"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="currentColor"><rect x="4" y="5" width="2.5" height="14" rx="1"/><path d="M20 5.5v13a1 1 0 0 1-1.5.8L8.5 12.8a1 1 0 0 1 0-1.6l10-6.5A1 1 0 0 1 20 5.5z"/></svg></button>
+      <button class="knapp" id="forrige" type="button" title="Forrige setning (←)" aria-label="Forrige setning"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="currentColor"><path d="M12 6v12L3 12zM21 6v12l-9-6z"/></svg></button>
+      <button class="knapp hoved spill" id="spill" type="button" title="Spill (mellomrom)" aria-label="Spill"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" fill="currentColor" id="spill-ikon"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></button>
+      <button class="knapp" id="neste" type="button" title="Neste setning (→)" aria-label="Neste setning"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="currentColor"><path d="M12 6v12l9-6zM3 6v12l9-6z"/></svg></button>
+      <button class="knapp" id="neste-side" type="button" title="Neste side (Shift + →)" aria-label="Neste side"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="currentColor"><rect x="17.5" y="5" width="2.5" height="14" rx="1"/><path d="M4 5.5v13a1 1 0 0 0 1.5.8l10-6.5a1 1 0 0 0 0-1.6l-10-6.5A1 1 0 0 0 4 5.5z"/></svg></button>
+    </div>
+    <div class="fart">
+      <button class="knapp" id="tregere" type="button" title="Tregere (−)">−</button>
+      <input type="range" id="fart" min="0.5" max="3" step="0.05" value="1" aria-label="Lesehastighet">
+      <button class="knapp" id="raskere" type="button" title="Raskere (+)">+</button>
+      <span class="fartverdi" id="fartverdi">1,0×</span>
+    </div>
+    <div class="posisjon" id="posisjon"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const claude = window.claude;
+  const bruk = (n) => (claude && claude.use ? claude.use(n).catch(() => null) : Promise.resolve(null));
+
+  const BATCH = 4;          // bilder per kall til Claude
+  const PARALLELLE = 2;     // kall som kjører samtidig
+  const CHUNK = 25;         // sider per lagringsdokument
+
+  // ---------------- Tilstand ----------------
+  // side: { navn, fil, status: venter|jobber|klar|feil|uten, tekst, setninger[], feilmelding }
+  let sider = [];
+  let pos = { side: 0, setning: 0 };
+  let spiller = false;
+  let venterPå = -1;
+  let gjenkjenningPause = false;
+  let aktive = 0;
+  let førsteKall = true;
+  let fart = 1;
+
+  // ---------------- Setningsdeling ----------------
+  const FORKORTELSER = ['f.eks.', 'bl.a.', 'osv.', 'dvs.', 'mv.', 'ca.', 'nr.', 'jf.', 'pga.', 'evt.', 'mill.', 'mrd.', 'kr.', 'o.l.', 'm.m.', 'ifm.', 'iht.', 'mht.', 'vha.', 'inkl.', 'ekskl.', 'kap.', 'fig.', 'tab.', 'ref.', 's.', 'pst.', 'Dr.'];
+  const PLASS = '․';
+  function delSetninger(tekst) {
+    const ut = [];
+    for (const avsnitt of tekst.split(/\n+/).map((s) => s.trim()).filter(Boolean)) {
+      let a = avsnitt;
+      for (const f of FORKORTELSER) a = a.split(f).join(f.replace(/\./g, PLASS));
+      a = a.replace(/(\d)\.(\d)/g, `$1${PLASS}$2`);
+      const deler = a.split(/(?<=[.!?…])\s+(?=[«"“(\[A-ZÆØÅ0-9–-])/);
+      const avsnittSetninger = [];
+      for (let d of deler) {
+        d = d.split(PLASS).join('.').trim();
+        if (!d) continue;
+        // Lange setninger deles ved komma/semikolon, så lesingen kan følges og hoppes i.
+        while (d.length > 260) {
+          const kutt = Math.max(d.lastIndexOf(', ', 220), d.lastIndexOf('; ', 220));
+          if (kutt < 80) break;
+          avsnittSetninger.push(d.slice(0, kutt + 1));
+          d = d.slice(kutt + 2);
+        }
+        avsnittSetninger.push(d);
+      }
+      ut.push(avsnittSetninger);
+    }
+    return ut; // liste av avsnitt, hvert avsnitt er en liste av setninger
+  }
+  function flat(side) { return side.avsnitt ? side.avsnitt.flat() : []; }
+  function settTekst(side, tekst) {
+    side.tekst = tekst;
+    side.avsnitt = delSetninger(tekst);
+    side.setninger = flat(side);
+  }
+
+  // ---------------- Lagring ----------------
+  // Claude-sidens database (privat per bruker), ellers nettleserens localStorage.
+  const lagring = {
+    type: 'ingen', db: null, rot: null, kø: new Map(), venter: new Map(),
+    async init() {
+      const [db, user] = await Promise.all([bruk('db'), bruk('user')]);
+      const id = user && user.id ? await user.id().catch(() => null) : null;
+      if (db && id) {
+        try {
+          this.rot = db.doc(`data/users/${id}/sideleser`);
+          await this.rot.get();
+          this.db = db; this.type = 'db';
+          return;
+        } catch (e) { /* faller tilbake */ }
+      }
+      try { localStorage.setItem('sideleser-test', '1'); localStorage.removeItem('sideleser-test'); this.type = 'lokal'; } catch (e) { this.type = 'ingen'; }
+    },
+    // Én skriving om gangen per dokument; raske endringer slås sammen.
+    skriv(nøkkel, lagData) {
+      this.venter.set(nøkkel, lagData);
+      if (this.kø.get(nøkkel)) return;
+      const kjør = async () => {
+        await new Promise((r) => setTimeout(r, 400));
+        while (this.venter.has(nøkkel)) {
+          const f = this.venter.get(nøkkel); this.venter.delete(nøkkel);
+          try { await this.skrivNå(nøkkel, f()); } catch (e) { console.warn('Lagring feilet', e); }
+        }
+        this.kø.delete(nøkkel);
+      };
+      this.kø.set(nøkkel, kjør());
+    },
+    async skrivNå(nøkkel, data) {
+      if (this.type === 'db') {
+        const ref = nøkkel === 'meta' ? this.rot.collection('data').doc('meta') : this.rot.collection('sider').doc(nøkkel);
+        await ref.set(data);
+      } else if (this.type === 'lokal') {
+        localStorage.setItem('sideleser-' + nøkkel, JSON.stringify(data));
+      }
+    },
+    async les(nøkkel) {
+      if (this.type === 'db') {
+        const ref = nøkkel === 'meta' ? this.rot.collection('data').doc('meta') : this.rot.collection('sider').doc(nøkkel);
+        const s = await ref.get();
+        return s.exists ? s.data() : null;
+      }
+      if (this.type === 'lokal') { try { return JSON.parse(localStorage.getItem('sideleser-' + nøkkel) || 'null'); } catch (e) { return null; } }
+      return null;
+    },
+    lagreMeta() {
+      this.skriv('meta', () => ({ navn: sider.map((s) => s.navn), pos: { ...pos }, fart, oppdatert: Date.now() }));
+    },
+    lagreSide(i) {
+      const k = Math.floor(i / CHUNK);
+      this.skriv('k' + k, () => {
+        const ut = {};
+        for (let j = k * CHUNK; j < Math.min(sider.length, (k + 1) * CHUNK); j++) {
+          const s = sider[j];
+          if (s.status === 'klar' || s.status === 'feil') ut[j] = { status: s.status, tekst: s.tekst || '' };
+        }
+        return { sider: ut };
+      });
+    },
+    async lastInn() {
+      const meta = await this.les('meta').catch(() => null);
+      if (!meta || !Array.isArray(meta.navn) || !meta.navn.length) return false;
+      sider = meta.navn.map((navn) => ({ navn, fil: null, status: 'uten', tekst: '', avsnitt: [], setninger: [] }));
+      for (let k = 0; k * CHUNK < sider.length; k++) {
+        const d = await this.les('k' + k).catch(() => null);
+        for (const [i, v] of Object.entries((d && d.sider) || {})) {
+          const s = sider[Number(i)];
+          if (!s) continue;
+          if (v.status === 'klar') { s.status = 'klar'; settTekst(s, v.tekst || ''); }
+        }
+      }
+      if (meta.pos) pos = { side: Math.min(meta.pos.side || 0, sider.length - 1), setning: meta.pos.setning || 0 };
+      if (meta.fart) fart = meta.fart;
+      return true;
+    },
+    async nullstill() {
+      const antall = Math.ceil(sider.length / CHUNK);
+      this.venter.clear();
+      if (this.type === 'db') {
+        await this.rot.collection('data').doc('meta').delete().catch(() => {});
+        for (let k = 0; k < antall; k++) await this.rot.collection('sider').doc('k' + k).delete().catch(() => {});
+      } else if (this.type === 'lokal') {
+        for (const n of Object.keys(localStorage)) if (n.startsWith('sideleser-') && n !== 'sideleser-innst') localStorage.removeItem(n);
+      }
+    },
+  };
+
+  // ---------------- Talemotorer ----------------
+  // Felles grensesnitt: spill(setninger, fra, {påSetning, påFerdig}), stopp(), settFart(r), navn, min, maks
+  class NettleserMotor {
+    constructor() { this.navn = 'nettleser'; this.min = 0.5; this.maks = 3; this.gen = 0; this.stemme = null; }
+    stemmer() {
+      const alle = speechSynthesis.getVoices();
+      const norsk = alle.filter((v) => /^(nb|no|nn)([-_]|$)/i.test(v.lang));
+      const andre = alle.filter((v) => !norsk.includes(v));
+      return { norsk, andre };
+    }
+    spill(setninger, fra, cb) {
+      this.stopp();
+      const gen = ++this.gen;
+      const neste = (i) => {
+        if (gen !== this.gen) return;
+        if (i >= setninger.length) { cb.påFerdig(); return; }
+        cb.påSetning(i);
+        const u = new SpeechSynthesisUtterance(setninger[i]);
+        if (this.stemme) { u.voice = this.stemme; u.lang = this.stemme.lang; } else u.lang = 'nb-NO';
+        u.rate = fart;
+        let ferdig = false;
+        const videre = () => { if (ferdig) return; ferdig = true; neste(i + 1); };
+        u.onend = videre;
+        u.onerror = (e) => {
+          if (e.error === 'interrupted' || e.error === 'canceled') return;
+          if (e.error === 'not-allowed') { ferdig = true; settSpiller(false); visMelding('Nettleseren ville ikke starte opplesningen automatisk. Trykk på avspillingsknappen for å starte.'); return; }
+          videre();
+        };
+        this.nå = { setninger, i, cb };
+        speechSynthesis.speak(u);
+      };
+      neste(fra);
+    }
+    stopp() { this.gen++; speechSynthesis.cancel(); }
+    settFart() {
+      // Start gjeldende setning på nytt med ny fart.
+      if (spiller && this.nå) { const { setninger, i, cb } = this.nå; this.spill(setninger, i, cb); }
+    }
+  }
+
+  class ClaudeMotor {
+    constructor(tts, språk) {
+      this.navn = 'claude'; this.min = 0.7; this.maks = 1.5; this.tts = tts; this.språk = språk; this.gen = 0;
+      tts.onLine(({ id }) => { if (this.cb && id && id.startsWith(this.gen + ':')) this.cb.påSetning(Number(id.split(':')[1])); });
+    }
+    async spill(setninger, fra, cb) {
+      const gen = ++this.gen;
+      this.cb = cb;
+      // Del opp i bolker under 1800 tegn og les dem etter hverandre.
+      let i = fra;
+      try {
+        while (i < setninger.length && gen === this.gen) {
+          const linjer = [];
+          let lengde = 0;
+          while (i < setninger.length && (lengde === 0 || lengde + setninger[i].length < 1800)) {
+            linjer.push({ text: setninger[i].slice(0, 1900), id: gen + ':' + i, ...(this.språk ? { language: this.språk } : {}) });
+            lengde += setninger[i].length; i++;
+          }
+          await this.tts.speak(linjer, { rate: this.fartFor() });
+        }
+        if (gen === this.gen) cb.påFerdig();
+      } catch (e) {
+        if (gen === this.gen && e && e.code !== 'stopped') { visMelding('Claude-stemmen stoppet (' + (e.code || 'feil') + '). Trykk spill for å fortsette.', true); settSpiller(false); }
+      }
+    }
+    fartFor() { return Math.min(this.maks, Math.max(this.min, fart)); }
+    stopp() { this.gen++; if (this.tts.active && this.tts.active()) this.tts.stop().catch(() => {}); }
+    settFart() { if (spiller) this.tts.setRate(this.fartFor()).catch(() => {}); }
+  }
+
+  let motor = null;
+  let nettleser = 'speechSynthesis' in window ? new NettleserMotor() : null;
+  let claudeMotor = null;
+
+  async function fyllStemmer() {
+    const velg = $('stemme');
+    const lagret = innst().stemme;
+    velg.innerHTML = '';
+    const leggTil = (verdi, tekst, gruppe) => { const o = document.createElement('option'); o.value = verdi; o.textContent = tekst; (gruppe || velg).appendChild(o); };
+    let norsk = [], andre = [];
+    if (nettleser) ({ norsk, andre } = nettleser.stemmer());
+    if (norsk.length) { const g = document.createElement('optgroup'); g.label = 'Norske stemmer'; velg.appendChild(g); norsk.forEach((v) => leggTil('n:' + v.name, v.name, g)); }
+    if (claudeMotor) leggTil('claude', 'Claude-stemmen (0,7–1,5×)');
+    if (andre.length) { const g = document.createElement('optgroup'); g.label = 'Andre språk'; velg.appendChild(g); andre.forEach((v) => leggTil('n:' + v.name, `${v.name} (${v.lang})`, g)); }
+    if (!velg.options.length) leggTil('', 'Ingen stemmer funnet');
+    const finnes = [...velg.options].some((o) => o.value === lagret);
+    velg.value = finnes ? lagret : (norsk.length ? 'n:' + (norsk.find((v) => /natural|online/i.test(v.name)) || norsk[0]).name : claudeMotor ? 'claude' : velg.options[0].value);
+    velgMotor(velg.value, false);
+  }
+  function velgMotor(verdi, lagre = true) {
+    const varSpiller = spiller;
+    if (motor) motor.stopp();
+    if (verdi === 'claude' && claudeMotor) motor = claudeMotor;
+    else if (verdi.startsWith('n:') && nettleser) {
+      motor = nettleser;
+      nettleser.stemme = speechSynthesis.getVoices().find((v) => v.name === verdi.slice(2)) || null;
+    } else motor = nettleser || claudeMotor;
+    if (lagre) lagreInnst({ stemme: verdi });
+    oppdaterFartGrenser();
+    if (varSpiller) spillFra(pos.side, pos.setning);
+  }
+
+  // ---------------- Innstillinger (per nettleser) ----------------
+  function innst() { try { return JSON.parse(localStorage.getItem('sideleser-innst') || '{}'); } catch (e) { return {}; } }
+  function lagreInnst(endring) { try { localStorage.setItem('sideleser-innst', JSON.stringify({ ...innst(), ...endring })); } catch (e) { /* ignorer */ } }
+
+  // ---------------- Fart ----------------
+  const fmtFart = (r) => r.toLocaleString('nb-NO', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) + '×';
+  function settFart(r, lagre = true) {
+    const min = motor ? motor.min : 0.5, maks = motor ? motor.maks : 3;
+    fart = Math.round(Math.min(maks, Math.max(min, r)) * 100) / 100;
+    $('fart').value = fart;
+    $('fartverdi').textContent = fmtFart(fart);
+    if (motor) motor.settFart();
+    if (lagre) { lagreInnst({ fart }); }
+  }
+  function oppdaterFartGrenser() {
+    if (!motor) return;
+    $('fart').min = motor.min; $('fart').max = motor.maks;
+    settFart(fart, false);
+  }
+  $('fart').addEventListener('input', (e) => settFart(Number(e.target.value)));
+  $('tregere').addEventListener('click', () => settFart(fart - 0.1));
+  $('raskere').addEventListener('click', () => settFart(fart + 0.1));
+
+  // ---------------- Avspilling ----------------
+  let vekkelås = null;
+  async function holdSkjermVåken(på) {
+    try {
+      if (på && !vekkelås && navigator.wakeLock) { vekkelås = await navigator.wakeLock.request('screen'); vekkelås.addEventListener('release', () => { vekkelås = null; }); }
+      if (!på && vekkelås) { await vekkelås.release(); vekkelås = null; }
+    } catch (e) { vekkelås = null; }
+  }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && spiller) holdSkjermVåken(true); });
+
+  function settSpiller(på) {
+    spiller = på;
+    $('spill-ikon').innerHTML = på ? '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>' : '<path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/>';
+    $('spill').title = på ? 'Pause (mellomrom)' : 'Spill (mellomrom)';
+    $('spill').setAttribute('aria-label', på ? 'Pause' : 'Spill');
+    holdSkjermVåken(på);
+    if (!på) { if (motor) motor.stopp(); venterPå = -1; lagring.lagreMeta(); }
+    tegnPosisjon();
+  }
+
+  function spillFra(side, setning) {
+    if (motor) motor.stopp();
+    venterPå = -1;
+    if (side >= sider.length) { pos = { side: sider.length - 1, setning: 0 }; settSpiller(false); visMelding('Ferdig! Alle sidene er lest.'); return; }
+    pos = { side: Math.max(0, side), setning: Math.max(0, setning) };
+    visSide(pos.side);
+    lagring.lagreMeta();
+    if (!spiller) return;
+    const s = sider[pos.side];
+    if (s.status === 'feil' || s.status === 'uten' || (s.status === 'klar' && s.setninger.length === 0)) { spillFra(pos.side + 1, 0); return; }
+    if (s.status !== 'klar') { venterPå = pos.side; tegnPosisjon(); startGjenkjenning(); return; }
+    if (!motor) { visMelding('Fant ingen stemme å lese med i denne nettleseren. Prøv Microsoft Edge eller Google Chrome.', true); settSpiller(false); return; }
+    motor.spill(s.setninger, Math.min(pos.setning, s.setninger.length - 1), {
+      påSetning: (i) => { pos.setning = i; markerSetning(); tegnPosisjon(); },
+      påFerdig: () => { spillFra(pos.side + 1, 0); },
+    });
+  }
+
+  $('spill').addEventListener('click', () => {
+    if (spiller) { settSpiller(false); return; }
+    settSpiller(true);
+    spillFra(pos.side, pos.setning);
+  });
+  const hopp = (side, setning) => { if (spiller) spillFra(side, setning); else { pos = { side, setning }; visSide(side); lagring.lagreMeta(); } };
+  $('forrige').addEventListener('click', () => {
+    if (pos.setning > 0) hopp(pos.side, pos.setning - 1);
+    else if (pos.side > 0) { const f = sider[pos.side - 1]; hopp(pos.side - 1, Math.max(0, f.setninger.length - 1)); }
+  });
+  $('neste').addEventListener('click', () => {
+    const s = sider[pos.side];
+    if (s && pos.setning < s.setninger.length - 1) hopp(pos.side, pos.setning + 1); else hopp(Math.min(sider.length - 1, pos.side + 1), 0);
+  });
+  $('forrige-side').addEventListener('click', () => hopp(pos.setning > 1 ? pos.side : Math.max(0, pos.side - 1), 0));
+  $('neste-side').addEventListener('click', () => hopp(Math.min(sider.length - 1, pos.side + 1), 0));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest('input, select, textarea') && e.target.type !== 'range') return;
+    if (!sider.length) return;
+    if (e.key === ' ') { e.preventDefault(); $('spill').click(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); (e.shiftKey ? $('forrige-side') : $('forrige')).click(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); (e.shiftKey ? $('neste-side') : $('neste')).click(); }
+    else if (e.key === '+' || e.key === '=') settFart(fart + 0.1);
+    else if (e.key === '-') settFart(fart - 0.1);
+  });
+
+  // ---------------- Visning ----------------
+  let visesSide = -1;
+  function visSide(i) {
+    const s = sider[i];
+    if (!s) return;
+    $('lesekort').hidden = false;
+    $('side-tittel').textContent = `Side ${i + 1} av ${sider.length}`;
+    $('side-navn').textContent = s.navn;
+    const boks = $('lesetekst');
+    boks.innerHTML = '';
+    if (s.status === 'klar' && s.setninger.length) {
+      let n = 0;
+      for (const avsnitt of s.avsnitt) {
+        const p = document.createElement('p');
+        for (const setning of avsnitt) {
+          const span = document.createElement('span');
+          span.className = 'setning';
+          span.dataset.i = n++;
+          span.textContent = setning + ' ';
+          p.appendChild(span);
+        }
+        boks.appendChild(p);
+      }
+    } else {
+      const p = document.createElement('p');
+      p.className = 'tom';
+      p.textContent = s.status === 'klar' ? 'Fant ingen tekst på denne siden.'
+        : s.status === 'feil' ? `Teksten kunne ikke leses: ${s.feilmelding || 'ukjent feil'}. Trykk «Prøv mislykkede igjen».`
+        : s.status === 'uten' ? 'Bildet til denne siden er ikke lastet opp i denne økten. Velg de samme bildene på nytt for å fullføre.'
+        : 'Teksten gjøres om … Den kommer om et øyeblikk.';
+      boks.appendChild(p);
+    }
+    visesSide = i;
+    markerSetning(true);
+    tegnPosisjon();
+    tegnKart();
+  }
+  $('lesetekst').addEventListener('click', (e) => {
+    const span = e.target.closest('.setning');
+    if (!span) return;
+    if (!spiller) settSpiller(true);
+    spillFra(visesSide, Number(span.dataset.i));
+  });
+  function markerSetning(rull) {
+    const boks = $('lesetekst');
+    boks.querySelectorAll('.setning.na').forEach((el) => el.classList.remove('na'));
+    if (visesSide !== pos.side) return;
+    const el = boks.querySelector(`.setning[data-i="${pos.setning}"]`);
+    if (!el) return;
+    el.classList.add('na');
+    const r = el.getBoundingClientRect();
+    const spillerHøyde = $('spiller').getBoundingClientRect().height;
+    if (rull !== false && (r.top < 80 || r.bottom > window.innerHeight - spillerHøyde - 20)) {
+      el.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    }
+  }
+  function tegnPosisjon() {
+    const s = sider[pos.side];
+    if (!s) { $('posisjon').textContent = ''; return; }
+    const venter = venterPå >= 0 ? ` · venter på at side ${venterPå + 1} blir klar …` : '';
+    $('posisjon').textContent = `Side ${pos.side + 1} av ${sider.length}` + (s.setninger.length ? ` · setning ${Math.min(pos.setning + 1, s.setninger.length)} av ${s.setninger.length}` : '') + venter;
+  }
+  function tegnKart() {
+    const kart = $('sidekart');
+    if (kart.children.length !== sider.length) {
+      kart.innerHTML = '';
+      sider.forEach((_, i) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'celle'; b.dataset.i = i;
+        kart.appendChild(b);
+      });
+    }
+    let klare = 0, feil = 0, uten = 0;
+    sider.forEach((s, i) => {
+      const b = kart.children[i];
+      b.className = 'celle ' + s.status + (i === pos.side ? ' her' : '');
+      b.title = `Side ${i + 1}: ${s.navn}`;
+      b.setAttribute('aria-label', `Side ${i + 1}`);
+      if (s.status === 'klar') klare++;
+      if (s.status === 'feil') feil++;
+      if (s.status === 'uten') uten++;
+    });
+    $('linjefrem').style.width = (sider.length ? (klare / sider.length) * 100 : 0) + '%';
+    const igjen = sider.length - klare - feil - uten;
+    $('status-tekst').textContent = `Tekst klar: ${klare} av ${sider.length} sider` + (feil ? ` · ${feil} feilet` : '') + (uten ? ` · ${uten} mangler bilde` : '') + (igjen > 0 && gjenkjenningPause ? ' · satt på pause' : '');
+    $('prov-igjen').hidden = feil === 0;
+    $('pause-gjenkjenning').hidden = igjen === 0;
+    $('pause-gjenkjenning').textContent = gjenkjenningPause ? 'Fortsett' : 'Pause';
+  }
+  $('sidekart').addEventListener('click', (e) => {
+    const b = e.target.closest('.celle');
+    if (b) hopp(Number(b.dataset.i), 0);
+  });
+
+  function visMelding(tekst, feil) {
+    const m = $('melding');
+    m.hidden = !tekst;
+    m.textContent = tekst || '';
+    m.classList.toggle('feil', !!feil);
+  }
+
+  // ---------------- Tekstgjenkjenning med Claude ----------------
+  const FEIL = {
+    not_granted: 'Siden fikk ikke lov til å bruke Claude. Tillat det, og trykk «Fortsett».',
+    sampling_disabled: 'Claude er ikke tilgjengelig for kontoen din her.',
+    rate_limited: 'Du har nådd grensen for hvor mye Claude kan brukes akkurat nå. Vent litt og trykk «Fortsett».',
+    session_expired: 'Du er logget ut av claude.ai. Logg inn igjen og trykk «Fortsett».',
+    images_unavailable: 'Bilder kan ikke sendes til Claude fra denne visningen. Åpne siden på claude.ai i nettleseren.',
+  };
+  const STOPPKODER = ['not_granted', 'sampling_disabled', 'rate_limited', 'session_expired', 'images_unavailable', 'not_declared', 'capability_disabled', 'capability_removed'];
+
+  function lagPrompt(antall) {
+    return `Du får ${antall} bilde${antall > 1 ? 'r' : ''} av sider fra en lærebok eller notater, i rekkefølge. Teksten er som regel på norsk.
+Skriv av teksten på hver side slik at den kan leses høyt av en talesyntese:
+- Ta med all brødtekst, overskrifter, punktlister og faktabokser i naturlig leserekkefølge.
+- Gjengi teksten ordrett. Ikke oppsummer, ikke forklar, ikke legg til noe.
+- Hopp over sidetall, topptekst, bunntekst og annet som ikke er innhold.
+- Avslutt overskrifter med punktum, så de leses som egne setninger. Skriv hvert punkt i en liste på egen linje, avsluttet med punktum.
+- Formler og regnestykker skrives slik de uttales, for eksempel «Y er lik C pluss I pluss G».
+- Tabeller leses rad for rad i korte, hele setninger.
+- For figurer og grafer: skriv én kort setning som starter med «Figur:» og gjengir figurteksten.
+- Ikke bruk markdown eller spesialtegn som *, #, | eller _.
+- Hvis en side ikke har lesbar tekst, skriv bare [INGEN TEKST].
+
+Svar i nøyaktig dette formatet, med én blokk per bilde i samme rekkefølge som bildene:
+${Array.from({ length: antall }, (_, i) => `===SIDE ${i + 1}===\n(teksten på side ${i + 1})`).join('\n')}`;
+  }
+
+  function rens(t) {
+    return t.replace(/\[INGEN TEKST\]/gi, '').replace(/\*\*|__|^#+\s*|`/gm, '').replace(/^\s*[-*•]\s+/gm, '').replace(/[ \t]+/g, ' ').trim();
+  }
+  function tolkSvar(tekst, antall) {
+    const deler = tekst.split(/===\s*SIDE\s*(\d+)\s*===/i);
+    const ut = new Array(antall).fill(null);
+    for (let i = 1; i < deler.length; i += 2) {
+      const n = Number(deler[i]) - 1;
+      if (n >= 0 && n < antall && ut[n] === null) ut[n] = rens(deler[i + 1] || '');
+    }
+    if (antall === 1 && ut[0] === null && tekst.trim()) ut[0] = rens(tekst);
+    return ut;
+  }
+
+  function nesteBatch() {
+    const str = førsteKall ? 1 : BATCH;
+    // Prioriter sidene fra der du leser og fremover, deretter resten.
+    const rekke = [...sider.keys()].filter((i) => i >= pos.side).concat([...sider.keys()].filter((i) => i < pos.side));
+    const batch = [];
+    for (const i of rekke) {
+      const s = sider[i];
+      if (s.status !== 'venter' || !s.fil) continue;
+      if (batch.length && i !== batch[batch.length - 1] + 1) break; // sammenhengende sider gir bedre kontekst
+      batch.push(i);
+      if (batch.length >= (s.enkel ? 1 : str)) break;
+      if (s.enkel) break;
+    }
+    return batch;
+  }
+
+  let sample = null;
+  async function startGjenkjenning() {
+    if (gjenkjenningPause) return;
+    if (!sample) sample = await bruk('sample');
+    if (!sample) { visMelding('Claude er ikke tilgjengelig her. Åpne siden på claude.ai mens du er logget inn.', true); return; }
+    while (!gjenkjenningPause && aktive < PARALLELLE) {
+      const batch = nesteBatch();
+      if (!batch.length) break;
+      førsteKall = false;
+      aktive++;
+      kjørBatch(batch).finally(() => { aktive--; startGjenkjenning(); });
+    }
+    tegnKart();
+  }
+
+  async function kjørBatch(batch) {
+    batch.forEach((i) => { sider[i].status = 'jobber'; });
+    tegnKart();
+    try {
+      const { text } = await sample(lagPrompt(batch.length), { images: batch.map((i) => sider[i].fil), modelTier: $('kvalitet').value });
+      const tekster = tolkSvar(text, batch.length);
+      batch.forEach((i, k) => {
+        const s = sider[i];
+        if (tekster[k] === null) { s.status = 'feil'; s.feilmelding = 'svaret manglet denne siden'; }
+        else { s.status = 'klar'; settTekst(s, tekster[k]); }
+        lagring.lagreSide(i);
+      });
+    } catch (e) {
+      const kode = e && e.code;
+      if (STOPPKODER.includes(kode)) {
+        batch.forEach((i) => { sider[i].status = 'venter'; });
+        gjenkjenningPause = true;
+        visMelding(FEIL[kode] || `Gjenkjenningen stoppet (${kode}).`, true);
+      } else if (kode === 'image_rejected' && batch.length > 1) {
+        batch.forEach((i) => { sider[i].status = 'venter'; sider[i].enkel = true; }); // prøv bildene ett og ett
+      } else {
+        batch.forEach((i) => {
+          sider[i].status = 'feil';
+          sider[i].feilmelding = kode === 'image_rejected' ? 'bildet kunne ikke brukes (prøv JPG eller PNG)' : kode === 'refused' ? 'Claude ville ikke lese denne siden' : 'midlertidig feil';
+          lagring.lagreSide(i);
+        });
+      }
+    }
+    tegnKart();
+    if (venterPå >= 0 && batch.includes(venterPå) && sider[venterPå].status !== 'jobber' && sider[venterPå].status !== 'venter') {
+      const v = venterPå; venterPå = -1; if (spiller) spillFra(v, 0);
+    } else if (batch.includes(visesSide)) visSide(visesSide);
+  }
+
+  $('pause-gjenkjenning').addEventListener('click', () => {
+    gjenkjenningPause = !gjenkjenningPause;
+    if (!gjenkjenningPause) { visMelding(''); startGjenkjenning(); }
+    tegnKart();
+  });
+  $('prov-igjen').addEventListener('click', () => {
+    sider.forEach((s) => { if (s.status === 'feil' && s.fil) { s.status = 'venter'; s.enkel = true; } });
+    gjenkjenningPause = false; visMelding(''); startGjenkjenning();
+  });
+  let bekreftNullstill = false;
+  $('nullstill').addEventListener('click', async () => {
+    if (!bekreftNullstill) { bekreftNullstill = true; $('nullstill').textContent = 'Trykk igjen for å slette alt'; setTimeout(() => { bekreftNullstill = false; $('nullstill').textContent = 'Start på nytt'; }, 4000); return; }
+    bekreftNullstill = false;
+    settSpiller(false);
+    gjenkjenningPause = true;
+    await lagring.nullstill();
+    sider = []; pos = { side: 0, setning: 0 }; førsteKall = true; gjenkjenningPause = false;
+    $('nullstill').textContent = 'Start på nytt';
+    visMelding('');
+    oppdaterOppsett();
+  });
+
+  // ---------------- Opplasting ----------------
+  const samlet = new Intl.Collator('nb', { numeric: true, sensitivity: 'base' });
+  let oppstart = null;
+  async function leggTilFiler(filListe) {
+    let filer = [...filListe]; // kopier før vi venter: fillisten tømmes når feltet nullstilles
+    await oppstart;
+    filer = filer.filter((f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|heic)$/i.test(f.name));
+    if (!filer.length) { visMelding('Fant ingen bilder blant filene du valgte.', true); return; }
+    const sortering = $('sortering').value;
+    if (sortering === 'navn') filer.sort((a, b) => samlet.compare(a.name, b.name));
+    if (sortering === 'tid') filer.sort((a, b) => a.lastModified - b.lastModified || samlet.compare(a.name, b.name));
+    let koblet = 0, nye = 0;
+    for (const f of filer) {
+      // Bilder til sider fra en tidligere økt (samme filnavn) kobles på igjen.
+      const gammel = sider.find((s) => s.navn === f.name && !s.fil && s.status === 'uten');
+      if (gammel) { gammel.fil = f; gammel.status = 'venter'; koblet++; continue; }
+      if (sider.some((s) => s.navn === f.name && s.status === 'klar' && !s.fil)) continue;
+      sider.push({ navn: f.name, fil: f, status: 'venter', tekst: '', avsnitt: [], setninger: [] });
+      nye++;
+    }
+    if (/heic/i.test(filer.map((f) => f.type + f.name).join())) visMelding('Noen bilder er i HEIC-format. Hvis de feiler, eksporter dem som JPG.', true);
+    else visMelding(nye || koblet ? `${nye} nye bilder lagt til${koblet ? `, ${koblet} koblet til tidligere sider` : ''}.` : 'Disse bildene er allerede lagt til.');
+    lagring.lagreMeta();
+    oppdaterOppsett();
+    gjenkjenningPause = false;
+    startGjenkjenning();
+    // Start lesingen automatisk første gang.
+    if (!spiller && sider.length === nye) { settSpiller(true); spillFra(0, 0); }
+  }
+  $('filer').addEventListener('change', (e) => { leggTilFiler(e.target.files); e.target.value = ''; });
+  const slipp = $('slipp');
+  slipp.addEventListener('dragover', (e) => { e.preventDefault(); slipp.classList.add('over'); });
+  slipp.addEventListener('dragleave', () => slipp.classList.remove('over'));
+  slipp.addEventListener('drop', (e) => { e.preventDefault(); slipp.classList.remove('over'); leggTilFiler(e.dataTransfer.files); });
+  slipp.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('filer').click(); } });
+
+  function oppdaterOppsett() {
+    const har = sider.length > 0;
+    $('fremdrift').hidden = !har;
+    $('spiller').hidden = !har;
+    $('lesekort').hidden = !har;
+    $('slipp-tittel').textContent = har ? 'Legg til flere bilder' : 'Velg bildene av sidene';
+    slipp.style.padding = har ? '18px 16px' : '';
+    if (har) { visSide(Math.min(pos.side, sider.length - 1)); } else { $('sidekart').innerHTML = ''; }
+    tegnKart();
+  }
+
+  $('stemme').addEventListener('change', (e) => velgMotor(e.target.value));
+  $('kvalitet').addEventListener('change', (e) => lagreInnst({ kvalitet: e.target.value }));
+
+  // ---------------- Oppstart ----------------
+  oppstart = (async () => {
+    const i = innst();
+    if (i.kvalitet) $('kvalitet').value = i.kvalitet;
+    if (i.fart) fart = i.fart;
+    if (nettleser && speechSynthesis.getVoices().length === 0) {
+      await new Promise((r) => { speechSynthesis.addEventListener('voiceschanged', r, { once: true }); setTimeout(r, 1500); });
+    }
+    const tts = await bruk('tts');
+    if (tts) {
+      const språk = tts.languages ? await tts.languages().then((l) => ['nb', 'no', 'nb-NO'].find((x) => l.includes(x))).catch(() => undefined) : undefined;
+      claudeMotor = new ClaudeMotor(tts, språk);
+    }
+    await fyllStemmer();
+    let antallStemmer = nettleser ? speechSynthesis.getVoices().length : 0;
+    if (nettleser) speechSynthesis.addEventListener('voiceschanged', () => {
+      const n = speechSynthesis.getVoices().length;
+      if (n !== antallStemmer && !spiller) { antallStemmer = n; fyllStemmer(); }
+    });
+    settFart(fart, false);
+    await lagring.init();
+    if (await lagring.lastInn()) {
+      settFart(fart, false);
+      const mangler = sider.filter((s) => s.status === 'uten').length;
+      if (mangler) visMelding(`Fortsetter der du slapp. ${mangler} sider mangler tekst – velg de samme bildene på nytt for å fullføre dem.`);
+      else visMelding('Fortsetter der du slapp. Trykk på avspillingsknappen for å lese videre.');
+    }
+    oppdaterOppsett();
+  })();
+})();
+</script>
