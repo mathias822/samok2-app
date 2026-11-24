@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Samøk 2 – øvingsapp</title>
+  <link rel="stylesheet" href="/css/stil.css">
+  <script src="/vendor/plotly.min.js"></script>
+</head>
+<body>
+  <header class="topp">
+    <a class="logo" href="#/oversikt">📈 Samøk 2 <span>øvingsapp</span></a>
+    <nav class="meny">
+      <a href="#/oversikt" data-rute="oversikt">Oversikt</a>
+      <a href="#/lever" data-rute="lever">Lever sider</a>
+      <a href="#/grafer" data-rute="grafer">Grafer</a>
+      <a href="#/oppgaver" data-rute="oppgaver">Oppgaver</a>
+      <a href="#/begreper" data-rute="begreper">Begreper</a>
+      <a href="#/flashkort" data-rute="flashkort">Flashkort</a>
+      <a href="#/innstillinger" data-rute="innstillinger" title="Innstillinger og backup">⚙︎</a>
+    </nav>
+  </header>
+
+  <div id="demo-banner" class="demo-banner" hidden>
+    Demo-modus: Ingen API-nøkkel er lagt inn, så appen viser ferdige eksempelsvar. Se README for hvordan du legger inn nøkkelen.
+  </div>
+
+  <main id="innhold"></main>
+
+  <!-- Høytlesningslinje: vises når noe leses høyt -->
+  <div id="talelinje" class="talelinje" hidden>
+    <span class="tale-ikon">🔊</span>
+    <button id="tale-pause" class="knapp liten" type="button">⏸ Pause</button>
+    <button id="tale-stopp" class="knapp liten lys" type="button">⏹ Stopp</button>
+    <label class="tale-fart">Hastighet
+      <input id="tale-hastighet" type="range" min="0.5" max="2" step="0.1" value="1">
+      <output id="tale-hastighet-verdi">1,0×</output>
+    </label>
+  </div>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
