@@ -1,0 +1,3100 @@
+<title>Samøk 2 Øvingsapp</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Enkelt og ryddig design. Farger samlet øverst, så de er lette å endre. */
+:root {
+  --bakgrunn: #f6f7f9;
+  --kort: #ffffff;
+  --tekst: #1f2937;
+  --dempet: #6b7280;
+  --linje: #e5e7eb;
+  --hoved: #2563eb;
+  --hoved-mork: #1d4ed8;
+  --hoved-lys: #eff4ff;
+  --ok: #059669;
+  --ok-lys: #ecfdf5;
+  --fare: #dc2626;
+  --fare-lys: #fef2f2;
+  --rutenett: #eef0f3;
+  --felt: #ffffff;
+  --felt-kant: #d1d5db;
+  --info-kant: #bfdbfe;
+  --advarsel-bg: #fff7ed;
+  --advarsel-tekst: #9a3412;
+  --ok-tekst: #065f46;
+  --fare-tekst: #991b1b;
+  --radius: 12px;
+  --skygge: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bakgrunn: #0f1420; --kort: #171d2b; --tekst: #e6e9f0; --dempet: #9aa3b5; --linje: #2a3242;
+    --hoved: #5b8cff; --hoved-mork: #8fb0ff; --hoved-lys: #1c2a4a; --ok: #10b981; --ok-lys: #0f2e26;
+    --fare: #f87171; --fare-lys: #3a1a1d; --rutenett: #242b3a; --felt: #111725; --felt-kant: #374151;
+    --info-kant: #2f4a7f; --advarsel-bg: #3a2a14; --advarsel-tekst: #fdba74; --ok-tekst: #6ee7b7; --fare-tekst: #fca5a5;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bakgrunn: #0f1420; --kort: #171d2b; --tekst: #e6e9f0; --dempet: #9aa3b5; --linje: #2a3242;
+  --hoved: #5b8cff; --hoved-mork: #8fb0ff; --hoved-lys: #1c2a4a; --ok: #10b981; --ok-lys: #0f2e26;
+  --fare: #f87171; --fare-lys: #3a1a1d; --rutenett: #242b3a; --felt: #111725; --felt-kant: #374151;
+  --info-kant: #2f4a7f; --advarsel-bg: #3a2a14; --advarsel-tekst: #fdba74; --ok-tekst: #6ee7b7; --fare-tekst: #fca5a5;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bakgrunn);
+  color: var(--tekst);
+  font: 16px/1.55 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  padding-bottom: 80px;
+}
+h1 { font-size: 1.75rem; margin: 0.4em 0 0.5em; }
+h2 { font-size: 1.2rem; margin: 0 0 0.6em; }
+h3 { font-size: 1.02rem; margin: 0.8em 0 0.4em; }
+h4, h5 { margin: 0.8em 0 0.3em; }
+a { color: var(--hoved); }
+code { background: var(--bakgrunn); padding: 1px 5px; border-radius: 4px; font-size: 0.9em; }
+
+/* Toppmeny */
+.topp {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  padding: 10px 24px; background: var(--kort); border-bottom: 1px solid var(--linje);
+  position: sticky; top: 0; z-index: 10;
+}
+.logo { font-weight: 700; font-size: 1.1rem; color: var(--tekst); text-decoration: none; }
+.logo span { font-weight: 400; color: var(--dempet); }
+.meny { display: flex; gap: 2px; flex-wrap: wrap; }
+.meny a { padding: 6px 12px; border-radius: 8px; color: var(--tekst); text-decoration: none; font-size: 0.95rem; }
+.meny a:hover { background: var(--bakgrunn); }
+.meny a.aktiv { background: var(--hoved-lys); color: var(--hoved-mork); font-weight: 600; }
+
+.demo-banner { background: var(--advarsel-bg); color: var(--advarsel-tekst); border-bottom: 1px solid var(--linje); padding: 8px 24px; font-size: 0.92rem; text-align: center; }
+
+main { max-width: 1150px; margin: 0 auto; padding: 16px 24px; }
+
+/* Kort */
+.kort { background: var(--kort); border: 1px solid var(--linje); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: var(--skygge); }
+.kort.tom { text-align: center; padding: 32px 20px; }
+.dempet { color: var(--dempet); }
+.liten-tekst { font-size: 0.85rem; }
+.midt { text-align: center; }
+.feiltekst { color: var(--fare); background: var(--fare-lys); padding: 10px 14px; border-radius: 8px; }
+.rad-mellom { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.rad-mellom h1, .rad-mellom h2 { margin-bottom: 0.4em; }
+.to-kolonner { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.to-kolonner > .kort { margin-bottom: 0; }
+.to-kolonner + * { margin-top: 16px; }
+.handlinger { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+.tilbake { display: inline-block; margin-top: 8px; text-decoration: none; }
+
+/* Knapper */
+.knapp {
+  display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; cursor: pointer;
+  background: var(--hoved); color: white; padding: 9px 16px; border-radius: 9px; font: inherit; font-weight: 600;
+  text-decoration: none; transition: background 0.15s;
+}
+.knapp:hover { background: var(--hoved-mork); }
+.knapp:disabled { opacity: 0.5; cursor: not-allowed; }
+.knapp.lys { background: var(--kort); color: var(--tekst); border-color: var(--linje); }
+.knapp.lys:hover { background: var(--bakgrunn); }
+.knapp.fare { background: var(--kort); color: var(--fare); border-color: var(--fare-lys); }
+.knapp.fare:hover { background: var(--fare-lys); }
+.knapp.ok { background: var(--ok); }
+.knapp.ok:hover { background: #047857; }
+.knapp.liten { padding: 4px 10px; font-size: 0.85rem; font-weight: 500; }
+
+/* Skjemaer */
+.felt { display: flex; flex-direction: column; gap: 4px; margin: 12px 0; font-weight: 500; }
+input[type=text], input[type=search], input[type=number], select, textarea {
+  font: inherit; padding: 8px 10px; border: 1px solid var(--felt-kant); border-radius: 8px; background: var(--felt); color: var(--tekst); width: 100%;
+}
+textarea { resize: vertical; line-height: 1.5; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--hoved-lys); border-color: var(--hoved); }
+
+/* Oversikt */
+.statistikk { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.stat { background: var(--kort); border: 1px solid var(--linje); border-radius: var(--radius); padding: 14px 16px; }
+.stat strong { display: block; font-size: 1.6rem; }
+.stat span { color: var(--dempet); font-size: 0.9rem; }
+.temanett { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+.tema { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--linje); border-radius: 9px; text-decoration: none; color: var(--dempet); font-size: 0.93rem; }
+.tema.har { color: var(--tekst); border-color: var(--info-kant); background: var(--hoved-lys); }
+.tema.valgt { outline: 2px solid var(--hoved); }
+.tema small { white-space: nowrap; color: var(--dempet); }
+.leveranseliste { list-style: none; padding: 0; margin: 0; }
+.leveranseliste li { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--linje); flex-wrap: wrap; }
+.leveranseliste li:last-child { border-bottom: 0; }
+.leveranseliste a { display: flex; flex-direction: column; text-decoration: none; color: var(--tekst); }
+.leveranseliste a span { font-size: 0.88rem; }
+.chip { display: inline-block; background: var(--hoved-lys); color: var(--hoved-mork); padding: 2px 10px; border-radius: 99px; font-size: 0.82rem; text-decoration: none; margin: 2px 0; }
+.chips { margin-bottom: 16px; }
+
+/* Lever */
+.slippsone { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 32px; border: 2px dashed #cbd5e1; border-radius: var(--radius); cursor: pointer; text-align: center; background: var(--bakgrunn); }
+.slippsone.over, .slippsone:hover { border-color: var(--hoved); background: var(--hoved-lys); }
+.slipp-ikon { font-size: 2rem; }
+.forhandsvisning { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+.miniatyr { position: relative; width: 120px; display: flex; flex-direction: column; gap: 4px; font-size: 0.78rem; word-break: break-all; }
+.miniatyr img, .pdf-ikon { width: 120px; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid var(--linje); }
+.pdf-ikon { display: grid; place-items: center; background: var(--fare-lys); color: var(--fare); font-weight: 700; }
+.fjern { position: absolute; top: 4px; right: 4px; border: 0; background: rgba(0, 0, 0, 0.6); color: white; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; }
+.laster { display: flex; align-items: center; gap: 12px; color: var(--dempet); margin-top: 12px; }
+.spinner { width: 22px; height: 22px; border: 3px solid var(--linje); border-top-color: var(--hoved); border-radius: 50%; animation: snurr 0.8s linear infinite; flex-shrink: 0; }
+@keyframes snurr { to { transform: rotate(360deg); } }
+
+/* Side */
+.sammendrag { font-size: 1.04rem; }
+.poeng li { margin-bottom: 4px; }
+.fil-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+.fil-liste img { width: 100%; border-radius: 6px; border: 1px solid var(--linje); }
+.fil-pdf { grid-column: 1 / -1; }
+.begrepliste { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin: 0; }
+.begrepliste > div { background: var(--bakgrunn); border-radius: 9px; padding: 12px; }
+.begrepliste dt { font-weight: 700; }
+.begrepliste dd { margin: 4px 0 0; }
+
+/* Grafer */
+.graf-kort { border-top: 1px solid var(--linje); padding-top: 12px; margin-top: 12px; }
+.graf-kort:first-child { border-top: 0; margin-top: 0; padding-top: 0; }
+.graf-kort h3 { margin-top: 0; }
+.graf-innhold { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+.plott { width: 100%; height: 430px; overflow: hidden; }
+.kontroller { background: var(--bakgrunn); border-radius: 10px; padding: 12px; }
+.glider { display: block; margin-bottom: 12px; font-size: 0.86rem; }
+.glider-navn { display: block; font-weight: 500; margin-bottom: 2px; }
+.glider-rad { display: flex; align-items: center; gap: 8px; }
+.glider input[type=range] { flex: 1; accent-color: var(--hoved); }
+.glider output { min-width: 48px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.graf-resultat { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 8px; align-items: start; }
+.tabell-ramme { overflow-x: auto; min-width: 0; }
+.nokkeltall { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+.nokkeltall th { text-align: right; color: var(--dempet); font-weight: 500; padding: 4px 8px; }
+.nokkeltall td { padding: 5px 8px; border-top: 1px solid var(--linje); }
+.nokkeltall .tall { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nokkeltall .endring { color: var(--hoved-mork); }
+.forklaring { background: var(--hoved-lys); border-radius: 10px; padding: 10px 14px; }
+.forklaring h4 { margin: 0 0 4px; display: flex; justify-content: space-between; align-items: center; }
+.forklaring p { margin: 0; }
+.graf-oppsett { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 16px; }
+.grafmeny ul { list-style: none; padding: 0; margin: 0 0 8px; }
+.grafmeny a { display: block; padding: 6px 10px; border-radius: 7px; text-decoration: none; color: var(--tekst); font-size: 0.93rem; }
+.grafmeny a small { display: block; color: var(--dempet); font-size: 0.78rem; }
+.grafmeny a:hover { background: var(--bakgrunn); }
+.grafmeny a.aktiv { background: var(--hoved-lys); color: var(--hoved-mork); font-weight: 600; }
+.grafmeny h3:first-child { margin-top: 0; }
+
+/* Oppgaver */
+.sidevalg { max-height: 260px; overflow: auto; border: 1px solid var(--linje); border-radius: 9px; padding: 6px 10px; }
+.avkryss { display: flex; gap: 8px; align-items: baseline; padding: 4px 0; }
+.antall { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
+.antall label { display: flex; flex-direction: column; font-size: 0.9rem; }
+.poengsum { font-weight: 600; color: var(--hoved-mork); }
+.merke { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: var(--dempet); }
+.sporsmal { font-size: 1.06rem; font-weight: 500; }
+.alternativer { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.alternativ { display: flex; gap: 10px; align-items: baseline; padding: 10px 12px; border: 1px solid var(--linje); border-radius: 9px; cursor: pointer; }
+.alternativ:hover { background: var(--bakgrunn); }
+.alternativ.er-riktig { background: var(--ok-lys); border-color: var(--ok); }
+.alternativ.er-feil { background: var(--fare-lys); border-color: var(--fare); }
+.regnesvar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.regnesvar input { max-width: 200px; }
+.dom { font-weight: 600; padding: 10px 14px; border-radius: 9px; }
+.dom.riktig { background: var(--ok-lys); color: var(--ok-tekst); }
+.dom.feil { background: var(--fare-lys); color: var(--fare-tekst); }
+.losning { background: var(--bakgrunn); padding: 10px 14px; border-radius: 9px; margin: 10px 0; }
+.losning summary, .kriterier summary, .vurdering summary { cursor: pointer; font-weight: 600; }
+.losning summary .knapp { margin-left: 8px; }
+.kriterier { margin-bottom: 10px; }
+.vurdering { border: 1px solid var(--info-kant); background: var(--hoved-lys); border-radius: 10px; padding: 12px 16px; margin-top: 10px; }
+.vurdering h4 { margin-top: 0; display: flex; gap: 8px; align-items: center; }
+.karakter { background: var(--hoved); color: white; border-radius: 99px; padding: 2px 12px; font-weight: 700; font-size: 0.9rem; }
+.modellsvar { white-space: pre-wrap; }
+.oppgave textarea { margin-bottom: 8px; }
+
+/* Begreper */
+.filterlinje { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px; }
+.filterlinje input { flex: 2; min-width: 180px; }
+.filterlinje select { flex: 1; min-width: 160px; width: auto; }
+.bokstav { color: var(--hoved); border-bottom: 1px solid var(--linje); padding-bottom: 2px; }
+.begrep { padding: 14px 18px; margin-bottom: 10px; }
+.begrep h3 { margin: 0; }
+.begrep p { margin: 6px 0; }
+.verktoy { display: flex; gap: 6px; }
+.eksempel { color: var(--tekst); background: var(--bakgrunn); padding: 6px 10px; border-radius: 7px; }
+
+/* Flashkort */
+.bokser { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
+.bokser div { background: var(--kort); border: 1px solid var(--linje); border-radius: 9px; padding: 8px; text-align: center; }
+.bokser strong { display: block; font-size: 1.3rem; }
+.bokser span { color: var(--dempet); font-size: 0.82rem; }
+.flashkort { max-width: 640px; min-height: 260px; margin: 0 auto; background: var(--kort); border: 1px solid var(--linje); border-radius: 16px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.07); display: flex; align-items: center; justify-content: center; text-align: center; padding: 28px; cursor: pointer; }
+.flashkort:focus { outline: 2px solid var(--hoved); }
+.flashkort h2 { font-size: 1.7rem; }
+.flash-knapper { display: flex; justify-content: center; gap: 14px; margin-top: 18px; }
+.flash-knapper .knapp { padding: 12px 26px; font-size: 1.05rem; }
+
+/* Høytlesningslinje */
+.talelinje {
+  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 20;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;
+  background: #111827; color: white; padding: 10px 16px; border-radius: 14px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+.talelinje .knapp.lys { background: transparent; color: white; border-color: #4b5563; }
+.tale-fart { display: flex; align-items: center; gap: 6px; font-size: 0.88rem; }
+.tale-fart input { width: 110px; accent-color: #60a5fa; }
+
+/* Meldinger */
+.melding { position: fixed; top: 70px; left: 50%; transform: translate(-50%, -20px); opacity: 0; transition: all 0.3s; z-index: 30; background: #111827; color: white; padding: 10px 18px; border-radius: 10px; max-width: 90vw; }
+.melding.vis { opacity: 1; transform: translate(-50%, 0); }
+.melding.ok { background: var(--ok); }
+.melding.feil { background: var(--fare); }
+
+/* Mobil / smal skjerm */
+@media (max-width: 860px) {
+  main { padding: 12px 16px; }
+  .topp { padding: 10px 16px; }
+  .to-kolonner, .graf-innhold, .graf-resultat, .graf-oppsett { grid-template-columns: minmax(0, 1fr); }
+  .statistikk { grid-template-columns: repeat(2, 1fr); }
+  .plott { height: 340px; }
+  .nokkeltall { font-size: 0.82rem; }
+  .nokkeltall th, .nokkeltall td { padding: 4px 5px; }
+}
+
+/* Dialoger */
+.dialog-bakgrunn { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); display: grid; place-items: center; z-index: 40; padding: 16px; }
+.dialog { background: var(--kort); color: var(--tekst); border-radius: var(--radius); padding: 20px; width: min(460px, 100%); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25); }
+.dialog h3 { margin-top: 0; }
+.dialog-knapper { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.knapp.fare-fylt { background: var(--fare); }
+.knapp.fare-fylt:hover { background: #b91c1c; }
+.midt-rad { justify-content: center; }
+
+
+/* Tilpasning til claude.ai (mobilkanter og systemlinjer) */
+.topp { top: env(safe-area-inset-top, 0px); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 11; background: var(--kort); }
+main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.demo-banner { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.talelinje { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); max-width: calc(100% - 32px); }
+
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.2/plotly.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<header class="topp">
+    <a class="logo" href="#/oversikt">📈 Samøk 2 <span>øvingsapp</span></a>
+    <nav class="meny">
+      <a href="#/oversikt" data-rute="oversikt">Oversikt</a>
+      <a href="#/lever" data-rute="lever">Lever sider</a>
+      <a href="#/grafer" data-rute="grafer">Grafer</a>
+      <a href="#/oppgaver" data-rute="oppgaver">Oppgaver</a>
+      <a href="#/begreper" data-rute="begreper">Begreper</a>
+      <a href="#/flashkort" data-rute="flashkort">Flashkort</a>
+      <a href="#/innstillinger" data-rute="innstillinger" title="Innstillinger og backup">⚙︎</a>
+    </nav>
+  </header>
+
+  <div id="lagring-banner" class="demo-banner" hidden>
+    Sidens database er ikke tilgjengelig akkurat nå, så det du gjør lagres bare i denne nettleseren.
+  </div>
+
+  <main id="innhold"></main>
+
+  <!-- Høytlesningslinje: vises når noe leses høyt -->
+  <div id="talelinje" class="talelinje" hidden>
+    <span class="tale-ikon">🔊</span>
+    <button id="tale-pause" class="knapp liten" type="button">⏸ Pause</button>
+    <button id="tale-stopp" class="knapp liten lys" type="button">⏹ Stopp</button>
+    <label class="tale-fart">Hastighet
+      <input id="tale-hastighet" type="range" min="0.5" max="2" step="0.1" value="1">
+      <output id="tale-hastighet-verdi">1,0×</output>
+    </label>
+  </div>
+<script>
+(() => {
+  var __defProp = Object.defineProperty;
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+
+  // public/js/db.js
+  var DB_NAVN = "samok2";
+  var VERSJON = 1;
+  var TABELLER = ["leveranser", "begreper", "oppgavesett", "innstillinger"];
+  var dbLøfte = null;
+  function åpne() {
+    if (dbLøfte) return dbLøfte;
+    dbLøfte = new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAVN, VERSJON);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains("leveranser")) db.createObjectStore("leveranser", { keyPath: "id" });
+        if (!db.objectStoreNames.contains("begreper")) db.createObjectStore("begreper", { keyPath: "nokkel" });
+        if (!db.objectStoreNames.contains("oppgavesett")) db.createObjectStore("oppgavesett", { keyPath: "id" });
+        if (!db.objectStoreNames.contains("innstillinger")) db.createObjectStore("innstillinger", { keyPath: "id" });
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    return dbLøfte;
+  }
+  function løfte(req) {
+    return new Promise((resolve, reject) => {
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async function tabell(navn, modus = "readonly") {
+    const db = await åpne();
+    return db.transaction(navn, modus).objectStore(navn);
+  }
+  var indexedDbLagring = {
+    hentAlle: async (navn) => løfte((await tabell(navn)).getAll()),
+    hent: async (navn, id) => løfte((await tabell(navn)).get(id)),
+    lagre: async (navn, objekt2) => løfte((await tabell(navn, "readwrite")).put(objekt2)),
+    slett: async (navn, id) => løfte((await tabell(navn, "readwrite")).delete(id)),
+    tøm: async (navn) => løfte((await tabell(navn, "readwrite")).clear())
+  };
+  var lagring = indexedDbLagring;
+  function settLagring(ny) {
+    lagring = ny;
+  }
+  function hentAlle(navn) {
+    return lagring.hentAlle(navn);
+  }
+  function hent(navn, id) {
+    return lagring.hent(navn, id);
+  }
+  function lagre(navn, objekt2) {
+    return lagring.lagre(navn, objekt2);
+  }
+  function slett(navn, id) {
+    return lagring.slett(navn, id);
+  }
+  function tøm(navn) {
+    return lagring.tøm(navn);
+  }
+  function nyId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+  function begrepNøkkel(begrep) {
+    return String(begrep).trim().toLowerCase().replace(/\s+/g, " ");
+  }
+  async function leggTilBegreper(begreper, leveranseId) {
+    let nye = 0;
+    for (const b of begreper || []) {
+      if (!b.begrep) continue;
+      const nokkel = begrepNøkkel(b.begrep);
+      const finnes = await hent("begreper", nokkel);
+      if (finnes) {
+        if (!finnes.kilder.includes(leveranseId)) finnes.kilder.push(leveranseId);
+        if (b.tema && !finnes.temaer.includes(b.tema)) finnes.temaer.push(b.tema);
+        if (b.forklaring && !finnes.forklaring) finnes.forklaring = b.forklaring;
+        await lagre("begreper", finnes);
+      } else {
+        await lagre("begreper", {
+          nokkel,
+          begrep: b.begrep.trim(),
+          forklaring: b.forklaring,
+          eksempel: b.eksempel,
+          temaer: b.tema ? [b.tema] : [],
+          kilder: [leveranseId],
+          boks: 1,
+          // flashkort: boks 1 = må øves mest, boks 5 = kan godt
+          sistØvd: null,
+          lagt: Date.now()
+        });
+        nye++;
+      }
+    }
+    return nye;
+  }
+  async function fjernKildeFraBegreper(leveranseId) {
+    for (const b of await hentAlle("begreper")) {
+      if (!b.kilder.includes(leveranseId)) continue;
+      b.kilder = b.kilder.filter((k) => k !== leveranseId);
+      if (b.kilder.length === 0 && !b.egendefinert) await slett("begreper", b.nokkel);
+      else await lagre("begreper", b);
+    }
+  }
+  function blobTilDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(r.error);
+      r.readAsDataURL(blob);
+    });
+  }
+  async function dataUrlTilBlob(dataUrl) {
+    return (await fetch(dataUrl)).blob();
+  }
+  async function eksporter() {
+    const ut = { app: "samok2", versjon: 1, eksportert: (/* @__PURE__ */ new Date()).toISOString() };
+    for (const navn of TABELLER) {
+      const rader = await hentAlle(navn);
+      if (navn === "leveranser") {
+        for (const l of rader) {
+          l.filer = await Promise.all(l.filer.map(async (f) => ({ ...f, blob: void 0, dataUrl: await blobTilDataUrl(f.blob) })));
+        }
+      }
+      ut[navn] = rader;
+    }
+    return ut;
+  }
+  async function importer(data) {
+    if (data?.app !== "samok2") throw new Error("Dette ser ikke ut som en backup-fil fra denne appen.");
+    for (const navn of TABELLER) {
+      await tøm(navn);
+      for (const rad of data[navn] || []) {
+        if (navn === "leveranser") {
+          rad.filer = await Promise.all(rad.filer.map(async (f) => {
+            const { dataUrl, ...resten } = f;
+            return { ...resten, blob: await dataUrlTilBlob(dataUrl) };
+          }));
+        }
+        await lagre(navn, rad);
+      }
+    }
+  }
+  async function slettAlt() {
+    for (const navn of TABELLER) await tøm(navn);
+  }
+
+  // public/js/api.js
+  var transport = null;
+  function settTransport(t) {
+    transport = t;
+  }
+  async function post(url, data) {
+    if (transport) return transport.post(url, data);
+    let svar;
+    try {
+      svar = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    } catch {
+      throw new Error("Får ikke kontakt med appens server. Kjører start.bat-vinduet fortsatt?");
+    }
+    const json = await svar.json().catch(() => ({}));
+    if (!svar.ok) throw new Error(json.feil || `Serverfeil (${svar.status})`);
+    return json;
+  }
+  var statusCache = null;
+  async function status() {
+    if (transport) return transport.status();
+    if (!statusCache) {
+      statusCache = fetch("/api/status").then((r) => r.json()).catch(() => ({ demo: false, frakoblet: true }));
+    }
+    return statusCache;
+  }
+
+  // public/js/tale.js
+  var NettleserTale = class {
+    constructor() {
+      this.navn = "Nettleserens innebygde stemme";
+      this.biter = [];
+      this.indeks = 0;
+      this.hastighet = 1;
+      this.stemmeNavn = null;
+      this.vedEndring = () => {
+      };
+      this.status = "stoppet";
+      this.generasjon = 0;
+    }
+    støttes() {
+      return "speechSynthesis" in window;
+    }
+    stemmer() {
+      if (!this.støttes()) return [];
+      const alle = speechSynthesis.getVoices();
+      const norske = alle.filter((v) => /^(nb|no|nn)([-_]|$)/i.test(v.lang));
+      return norske.length ? norske : alle.filter((v) => /^(da|sv)/i.test(v.lang));
+    }
+    velgStemme() {
+      const stemmer = this.stemmer();
+      return stemmer.find((v) => v.name === this.stemmeNavn) || stemmer.find((v) => /natural|online/i.test(v.name)) || stemmer[0] || null;
+    }
+    // Lange tekster deles i setninger. Noen nettlesere stopper midt i lange avsnitt ellers.
+    delOpp(tekst3) {
+      const setninger = tekst3.replace(/\s+/g, " ").match(/[^.!?]+[.!?]*\s*/g) || [tekst3];
+      const biter = [];
+      let nå = "";
+      for (const s of setninger) {
+        if ((nå + s).length > 220 && nå) {
+          biter.push(nå);
+          nå = "";
+        }
+        nå += s;
+      }
+      if (nå.trim()) biter.push(nå);
+      return biter;
+    }
+    les(tekst3) {
+      if (!this.støttes()) {
+        console.warn("Nettleseren støtter ikke høytlesning.");
+        return;
+      }
+      this.stopp();
+      this.biter = this.delOpp(tekst3);
+      this.indeks = 0;
+      this.status = "spiller";
+      this.vedEndring();
+      this.lesNeste();
+    }
+    lesNeste() {
+      if (this.status === "stoppet") return;
+      if (this.indeks >= this.biter.length) {
+        this.status = "stoppet";
+        this.vedEndring();
+        return;
+      }
+      const ytring = new SpeechSynthesisUtterance(this.biter[this.indeks]);
+      const stemme = this.velgStemme();
+      if (stemme) {
+        ytring.voice = stemme;
+        ytring.lang = stemme.lang;
+      } else ytring.lang = "nb-NO";
+      ytring.rate = this.hastighet;
+      const gen = this.generasjon;
+      const ferdig = () => {
+        if (gen !== this.generasjon) return;
+        this.indeks++;
+        this.lesNeste();
+      };
+      ytring.onend = ferdig;
+      ytring.onerror = (e) => {
+        if (e.error !== "interrupted" && e.error !== "canceled") ferdig();
+      };
+      speechSynthesis.speak(ytring);
+    }
+    pause() {
+      if (this.status !== "spiller") return;
+      speechSynthesis.pause();
+      this.status = "pause";
+      this.vedEndring();
+    }
+    fortsett() {
+      if (this.status !== "pause") return;
+      this.status = "spiller";
+      speechSynthesis.resume();
+      setTimeout(() => {
+        if (this.status === "spiller" && !speechSynthesis.speaking) {
+          this.generasjon++;
+          this.lesNeste();
+        }
+      }, 300);
+      this.vedEndring();
+    }
+    stopp() {
+      this.generasjon++;
+      this.status = "stoppet";
+      if (this.støttes()) speechSynthesis.cancel();
+      this.vedEndring();
+    }
+    settHastighet(h) {
+      this.hastighet = h;
+      if (this.status === "spiller") {
+        this.generasjon++;
+        speechSynthesis.cancel();
+        setTimeout(() => this.lesNeste(), 50);
+      }
+    }
+    settStemme(navn) {
+      this.stemmeNavn = navn;
+    }
+  };
+  var tale = new NettleserTale();
+  function settTale(ny) {
+    ny.vedEndring = tale.vedEndring;
+    ny.hastighet = tale.hastighet;
+    ny.stemmeNavn = tale.stemmeNavn;
+    tale.stopp();
+    tale = ny;
+  }
+
+  // public/js/fag.js
+  var FAG_NAVN = "Samfunnsøkonomi 2";
+  var TEMAER = [
+    { id: "modeller", navn: "Økonomiske modeller og tenkemåter" },
+    { id: "marked", navn: "Markeder, tilbud og etterspørsel" },
+    { id: "nasjonalregnskap", navn: "Nasjonalregnskap og BNP" },
+    { id: "konjunkturer", navn: "Konjunkturer og produksjonsgap" },
+    { id: "makromodell", navn: "Keynesiansk modell og multiplikator" },
+    { id: "finanspolitikk", navn: "Finanspolitikk og statsbudsjett" },
+    { id: "penger", navn: "Penger, banker og kreditt" },
+    { id: "pengepolitikk", navn: "Pengepolitikk, rente og Norges Bank" },
+    { id: "inflasjon", navn: "Inflasjon og prisstabilitet" },
+    { id: "arbeidsmarked", navn: "Arbeidsmarked og arbeidsledighet" },
+    { id: "handel", navn: "Internasjonal handel og globalisering" },
+    { id: "valuta", navn: "Valuta og valutakurs" },
+    { id: "vekst", navn: "Økonomisk vekst og produktivitet" },
+    { id: "fordeling", navn: "Fordeling, velferd og skatt" },
+    { id: "barekraft", navn: "Bærekraft, miljø og klima" },
+    { id: "norsk_okonomi", navn: "Norsk økonomi, petroleum og handlingsregelen" },
+    { id: "kriser", navn: "Finanskriser og økonomisk ustabilitet" }
+  ];
+  var TEMA_IDER = TEMAER.map((t) => t.id);
+  function temaNavn(id) {
+    return TEMAER.find((t) => t.id === id)?.navn ?? id;
+  }
+
+  // public/js/ui.js
+  function esc(tekst3) {
+    return String(tekst3 ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  }
+  function html(streng) {
+    const t = document.createElement("template");
+    t.innerHTML = streng.trim();
+    return t.content.firstElementChild;
+  }
+  function lesHøytKnapp(hentTekst, etikett = "Les høyt") {
+    const knapp = html(`<button class="knapp liten lys" type="button" title="Les teksten høyt">🔊 ${esc(etikett)}</button>`);
+    knapp.addEventListener("click", () => tale.les(typeof hentTekst === "function" ? hentTekst() : hentTekst));
+    return knapp;
+  }
+  function temaChips(temaer = []) {
+    return temaer.map((t) => `<a class="chip" href="#/oversikt?tema=${encodeURIComponent(t)}">${esc(temaNavn(t))}</a>`).join(" ");
+  }
+  function dato(ms) {
+    return new Date(ms).toLocaleDateString("nb-NO", { day: "numeric", month: "short", year: "numeric" });
+  }
+  function melding(tekst3, type = "info") {
+    const boks = html(`<div class="melding ${type}">${esc(tekst3)}</div>`);
+    document.body.appendChild(boks);
+    setTimeout(() => boks.classList.add("vis"), 10);
+    setTimeout(() => {
+      boks.classList.remove("vis");
+      setTimeout(() => boks.remove(), 400);
+    }, 4e3);
+  }
+  function laster(tekst3) {
+    return `<div class="laster"><div class="spinner"></div><p>${esc(tekst3)}</p></div>`;
+  }
+  var navigator = (sti) => {
+    location.hash = "#" + sti;
+  };
+  function settNavigator(fn) {
+    navigator = fn;
+  }
+  function naviger(sti) {
+    navigator(sti);
+  }
+  function dialog(innhold, knapper) {
+    return new Promise((resolve) => {
+      const bakgrunn = html(`<div class="dialog-bakgrunn"><div class="dialog" role="dialog" aria-modal="true">${innhold}<div class="dialog-knapper"></div></div></div>`);
+      const rad = bakgrunn.querySelector(".dialog-knapper");
+      const lukk = (verdi) => {
+        bakgrunn.remove();
+        document.removeEventListener("keydown", escTast);
+        resolve(verdi);
+      };
+      const escTast = (e) => {
+        if (e.key === "Escape") lukk(null);
+      };
+      for (const k of knapper) {
+        const b = html(`<button type="button" class="knapp ${k.klasse || ""}">${k.tekst}</button>`);
+        b.addEventListener("click", () => lukk(k.verdi(bakgrunn)));
+        rad.appendChild(b);
+      }
+      bakgrunn.addEventListener("click", (e) => {
+        if (e.target === bakgrunn) lukk(null);
+      });
+      document.addEventListener("keydown", escTast);
+      document.body.appendChild(bakgrunn);
+      (bakgrunn.querySelector("input, textarea") || rad.lastElementChild).focus();
+    });
+  }
+  async function bekreft(tekst3, { ja = "Ja", fare = false } = {}) {
+    const svar = await dialog(`<p>${esc(tekst3)}</p>`, [
+      { tekst: "Avbryt", klasse: "lys", verdi: () => false },
+      { tekst: esc(ja), klasse: fare ? "fare-fylt" : "", verdi: () => true }
+    ]);
+    return svar === true;
+  }
+  async function skjemaDialog(tittel, felter, okTekst = "Lagre") {
+    const innhold = `<h3>${esc(tittel)}</h3>` + felter.map((f) => `<label class="felt">${esc(f.navn)}${f.flerlinje ? `<textarea data-id="${f.id}" rows="3"></textarea>` : `<input type="text" data-id="${f.id}">`}</label>`).join("");
+    return dialog(innhold, [
+      { tekst: "Avbryt", klasse: "lys", verdi: () => null },
+      { tekst: esc(okTekst), verdi: (el) => Object.fromEntries([...el.querySelectorAll("[data-id]")].map((i) => [i.dataset.id, i.value.trim()])) }
+    ]);
+  }
+
+  // public/js/uttrykk.js
+  var FUNKSJONER = {
+    sqrt: Math.sqrt,
+    ln: Math.log,
+    log: Math.log10,
+    exp: Math.exp,
+    sin: Math.sin,
+    cos: Math.cos,
+    abs: Math.abs,
+    min: Math.min,
+    max: Math.max
+  };
+  var KONSTANTER = { pi: Math.PI, e: Math.E };
+  function tokeniser(tekst3) {
+    const tokens = [];
+    const re = /\s*(?:(\d+(?:[.,]\d+)?(?:e[+-]?\d+)?)|([A-Za-z_æøåÆØÅ][A-Za-z0-9_æøåÆØÅ]*)|(\*\*|[-+*/^(),]))/y;
+    let pos = 0;
+    const s = String(tekst3).trim();
+    while (pos < s.length) {
+      re.lastIndex = pos;
+      const m = re.exec(s);
+      if (!m || m[0].length === 0) throw new Error(`Ugyldig tegn i uttrykket ved «${s.slice(pos, pos + 5)}»`);
+      pos = re.lastIndex;
+      if (m[1]) tokens.push({ t: "tall", v: parseFloat(m[1].replace(",", ".")) });
+      else if (m[2]) tokens.push({ t: "navn", v: m[2] });
+      else tokens.push({ t: "op", v: m[3] === "**" ? "^" : m[3] });
+    }
+    return tokens;
+  }
+  function kompiler(tekst3) {
+    const tokens = tokeniser(tekst3);
+    let i = 0;
+    const se = () => tokens[i];
+    const ta = (v) => {
+      const tok = tokens[i];
+      if (v !== void 0 && (!tok || tok.v !== v)) throw new Error(`Forventet «${v}» i uttrykket`);
+      i++;
+      return tok;
+    };
+    function sum() {
+      let venstre = produkt();
+      while (se() && (se().v === "+" || se().v === "-")) {
+        const op = ta().v;
+        const høyre = produkt();
+        const l = venstre;
+        venstre = op === "+" ? (v) => l(v) + høyre(v) : (v) => l(v) - høyre(v);
+      }
+      return venstre;
+    }
+    function produkt() {
+      let venstre = unær();
+      while (se() && (se().v === "*" || se().v === "/")) {
+        const op = ta().v;
+        const høyre = unær();
+        const l = venstre;
+        venstre = op === "*" ? (v) => l(v) * høyre(v) : (v) => l(v) / høyre(v);
+      }
+      return venstre;
+    }
+    function unær() {
+      if (se() && se().v === "-") {
+        ta();
+        const u = unær();
+        return (v) => -u(v);
+      }
+      if (se() && se().v === "+") {
+        ta();
+        return unær();
+      }
+      return potens();
+    }
+    function potens() {
+      const grunntall = atom();
+      if (se() && se().v === "^") {
+        ta();
+        const eksponent = unær();
+        return (v) => Math.pow(grunntall(v), eksponent(v));
+      }
+      return grunntall;
+    }
+    function atom() {
+      const tok = ta();
+      if (!tok) throw new Error("Uttrykket slutter for tidlig");
+      if (tok.t === "tall") return () => tok.v;
+      if (tok.v === "(") {
+        const inni = sum();
+        ta(")");
+        return inni;
+      }
+      if (tok.t === "navn") {
+        if (FUNKSJONER[tok.v] && se() && se().v === "(") {
+          ta("(");
+          const args = [sum()];
+          while (se() && se().v === ",") {
+            ta();
+            args.push(sum());
+          }
+          ta(")");
+          const f = FUNKSJONER[tok.v];
+          return (v) => f(...args.map((a) => a(v)));
+        }
+        const navn = tok.v;
+        return (v) => {
+          if (navn in v) return v[navn];
+          if (navn in KONSTANTER) return KONSTANTER[navn];
+          throw new Error(`Ukjent variabel «${navn}»`);
+        };
+      }
+      throw new Error(`Uventet «${tok.v}» i uttrykket`);
+    }
+    const resultat = sum();
+    if (i < tokens.length) throw new Error(`Uventet «${tokens[i].v}» i uttrykket`);
+    return resultat;
+  }
+
+  // public/js/grafmaler.js
+  function fmt(tall3, desimaler = 1) {
+    if (typeof tall3 !== "number" || !isFinite(tall3)) return "–";
+    return tall3.toLocaleString("nb-NO", { maximumFractionDigits: desimaler, minimumFractionDigits: 0 });
+  }
+  function fortegn(tall3, desimaler = 1) {
+    return (tall3 > 0 ? "+" : "") + fmt(tall3, desimaler);
+  }
+  function pentTak(v) {
+    if (v <= 0) return 10;
+    const størrelse = Math.pow(10, Math.floor(Math.log10(v)));
+    for (const f of [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) {
+      if (f * størrelse >= v) return f * størrelse;
+    }
+    return 10 * størrelse;
+  }
+  function prøv(x0, x1, f, n = 2) {
+    const xs = [], ys = [];
+    for (let i = 0; i <= n; i++) {
+      const x = x0 + (x1 - x0) * i / n;
+      xs.push(x);
+      ys.push(f(x));
+    }
+    return { x: xs, y: ys };
+  }
+  function endret(a, b, id) {
+    return Math.abs((a[id] ?? 0) - (b[id] ?? 0)) > 1e-9;
+  }
+  var FARGER = {
+    ettersporsel: "#2563eb",
+    tilbud: "#dc2626",
+    hjelp: "#6b7280",
+    gronn: "#059669",
+    lilla: "#7c3aed",
+    oransje: "#d97706"
+  };
+  var tilbudEttersporsel = {
+    id: "tilbud-ettersporsel",
+    navn: "Tilbud og etterspørsel",
+    beskrivelse: "Markedslikevekt med lineær etterspørsel P = a − b·Q og tilbud P = c + d·Q. Avgift per enhet (t) gir en kile mellom kjøperpris og selgerpris. Viser konsument- og produsentoverskudd.",
+    akser: { x: "Mengde (Q)", y: "Pris (P)" },
+    parametre: [
+      { id: "a", navn: "Etterspørselsnivå (a) – forskyver etterspørselskurven", min: 40, max: 160, steg: 5, start: 100 },
+      { id: "b", navn: "Helning på etterspørselskurven (b)", min: 0.5, max: 3, steg: 0.1, start: 1 },
+      { id: "c", navn: "Kostnadsnivå (c) – forskyver tilbudskurven", min: 0, max: 80, steg: 5, start: 20 },
+      { id: "d", navn: "Helning på tilbudskurven (d)", min: 0.5, max: 3, steg: 0.1, start: 1 },
+      { id: "t", navn: "Avgift per enhet (t)", min: 0, max: 40, steg: 1, start: 0 }
+    ],
+    beregn(p) {
+      const Q = Math.max(0, (p.a - p.c - p.t) / (p.b + p.d));
+      const Pk = p.a - p.b * Q;
+      const Ps = Pk - p.t;
+      const qMaks = p.a / p.b;
+      const kurver = [
+        { id: "D", navn: "Etterspørsel (D)", farge: FARGER.ettersporsel, ...prøv(0, qMaks, (q) => p.a - p.b * q) },
+        { id: "S", navn: "Tilbud (S)", farge: FARGER.tilbud, ...prøv(0, 200, (q) => p.c + p.d * q) }
+      ];
+      if (p.t > 0) {
+        kurver.push({ id: "St", navn: "Tilbud med avgift (S + t)", farge: FARGER.oransje, ...prøv(0, 200, (q) => p.c + p.t + p.d * q) });
+      }
+      const flater = [
+        { navn: "Konsumentoverskudd", farge: "rgba(37,99,235,0.12)", x: [0, 0, Q], y: [Pk, p.a, Pk] },
+        { navn: "Produsentoverskudd", farge: "rgba(220,38,38,0.12)", x: [0, 0, Q], y: [p.c, Ps, Ps] }
+      ];
+      if (p.t > 0) flater.push({ navn: "Avgiftsinntekt", farge: "rgba(217,119,6,0.18)", x: [0, Q, Q, 0], y: [Ps, Ps, Pk, Pk] });
+      const punkter = [{ navn: "Likevekt", x: Q, y: Pk, xEtikett: "Q*", yEtikett: p.t > 0 ? "P kjøper" : "P*" }];
+      if (p.t > 0) punkter.push({ navn: "Selgerpris", x: Q, y: Ps, yEtikett: "P selger", bi: true });
+      return {
+        kurver,
+        flater,
+        punkter,
+        verdier: [
+          { id: "Q", navn: "Likevektsmengde (Q*)", verdi: Q },
+          { id: "P", navn: p.t > 0 ? "Pris kjøperne betaler" : "Likevektspris (P*)", verdi: Pk },
+          ...p.t > 0 ? [{ id: "Ps", navn: "Pris selgerne får", verdi: Ps }, { id: "skatt", navn: "Avgiftsinntekt til staten", verdi: p.t * Q }] : [],
+          { id: "KO", navn: "Konsumentoverskudd", verdi: 0.5 * Q * (p.a - Pk) },
+          { id: "PO", navn: "Produsentoverskudd", verdi: 0.5 * Q * (Ps - p.c) }
+        ]
+      };
+    },
+    omrade(pA, pB) {
+      return { x: [0, 120], y: [0, pentTak(Math.max(pA.a, pB.a, pA.c + pA.t + 60, pB.c + pB.t + 60) * 1.1)] };
+    },
+    tolk(pA, pB, vA, vB) {
+      const s = [];
+      if (endret(pA, pB, "a")) s.push(pB.a > pA.a ? "Etterspørselskurven forskyves mot høyre (økt etterspørsel – f.eks. høyere inntekt, endrede preferanser eller dyrere substitutter). Både pris og mengde øker." : "Etterspørselskurven forskyves mot venstre (redusert etterspørsel). Både pris og mengde faller.");
+      if (endret(pA, pB, "c")) s.push(pB.c > pA.c ? "Tilbudskurven forskyves oppover/mot venstre (høyere produksjonskostnader). Prisen stiger og omsatt mengde faller." : "Tilbudskurven forskyves nedover/mot høyre (lavere kostnader, f.eks. ny teknologi). Prisen faller og omsatt mengde øker.");
+      if (endret(pA, pB, "t")) s.push("En avgift per enhet legger seg som en kile mellom prisen kjøperne betaler og prisen selgerne får. Omsatt mengde går ned. Hvem som bærer mest av avgiften, avhenger av hvor bratte kurvene er: den siden av markedet som er minst prisfølsom (brattest kurve), bærer mest.");
+      if (endret(pA, pB, "b")) s.push(pB.b > pA.b ? "En brattere etterspørselskurve betyr at etterspørselen er mindre prisfølsom (mer uelastisk)." : "En slakere etterspørselskurve betyr at etterspørselen er mer prisfølsom (mer elastisk).");
+      if (endret(pA, pB, "d")) s.push(pB.d > pA.d ? "En brattere tilbudskurve betyr at tilbudet er mindre prisfølsomt." : "En slakere tilbudskurve betyr at tilbudet er mer prisfølsomt.");
+      return s;
+    }
+  };
+  var keynesKryss = {
+    id: "keynes-kryss",
+    navn: "Keynesiansk kryssdiagram (multiplikator)",
+    beskrivelse: "Enkel keynesiansk makromodell: Y = C + I + G + X − Q, med C = C₀ + c·(Y − T) og Q = q·Y. Likevekt der samlet etterspørsel (SE) krysser 45°-linjen. Multiplikator = 1/(1 − c + q).",
+    akser: { x: "BNP / samlet produksjon (Y)", y: "Samlet etterspørsel (SE)" },
+    parametre: [
+      { id: "C0", navn: "Autonomt konsum (C₀)", min: 0, max: 400, steg: 10, start: 100 },
+      { id: "c", navn: "Marginal konsumtilbøyelighet (c)", min: 0.3, max: 0.95, steg: 0.05, start: 0.6 },
+      { id: "T", navn: "Nettoskatter (T)", min: 0, max: 600, steg: 10, start: 150 },
+      { id: "I", navn: "Realinvesteringer (I)", min: 0, max: 600, steg: 10, start: 150 },
+      { id: "G", navn: "Offentlig kjøp av varer og tjenester (G)", min: 0, max: 600, steg: 10, start: 200 },
+      { id: "X", navn: "Eksport (X)", min: 0, max: 600, steg: 10, start: 150 },
+      { id: "q", navn: "Marginal importtilbøyelighet (q)", min: 0, max: 0.5, steg: 0.05, start: 0.2 }
+    ],
+    hjelp: {
+      autonom: (p) => p.C0 - p.c * p.T + p.I + p.G + p.X,
+      mult: (p) => 1 / (1 - p.c + p.q)
+    },
+    beregn(p) {
+      const m = this.hjelp.mult(p);
+      const Y = this.hjelp.autonom(p) * m;
+      const xMaks = 6e3;
+      const SE = (y) => p.C0 + p.c * (y - p.T) + p.I + p.G + p.X - p.q * y;
+      return {
+        kurver: [
+          { id: "45", navn: "45°-linjen (SE = Y)", farge: FARGER.hjelp, strek: "dash", ...prøv(0, xMaks, (y) => y) },
+          { id: "SE", navn: "Samlet etterspørsel (SE)", farge: FARGER.ettersporsel, ...prøv(0, xMaks, SE) }
+        ],
+        punkter: [{ navn: "Likevekt", x: Y, y: Y, xEtikett: "Y*" }],
+        verdier: [
+          { id: "Y", navn: "Likevekts-BNP (Y*)", verdi: Y },
+          { id: "mult", navn: "Multiplikator 1/(1 − c + q)", verdi: m, desimaler: 2 },
+          { id: "C", navn: "Privat konsum (C)", verdi: p.C0 + p.c * (Y - p.T) },
+          { id: "Q", navn: "Import (Q)", verdi: p.q * Y },
+          { id: "budsjett", navn: "Offentlig budsjettbalanse (T − G)", verdi: p.T - p.G },
+          { id: "handel", navn: "Handelsbalanse (X − Q)", verdi: p.X - p.q * Y }
+        ]
+      };
+    },
+    omrade(pA, pB) {
+      const yA = this.hjelp.autonom(pA) * this.hjelp.mult(pA);
+      const yB = this.hjelp.autonom(pB) * this.hjelp.mult(pB);
+      const maks = pentTak(Math.max(yA, yB, 100) * 1.5);
+      return { x: [0, maks], y: [0, maks] };
+    },
+    tolk(pA, pB) {
+      const s = [];
+      const mA = this.hjelp.mult(pA), mB = this.hjelp.mult(pB);
+      const dAut = this.hjelp.autonom(pB) - this.hjelp.autonom(pA);
+      const sammeHelning = !endret(pA, pB, "c") && !endret(pA, pB, "q");
+      if (endret(pA, pB, "G") && endret(pA, pB, "T") && Math.abs(pB.G - pA.G - (pB.T - pA.T)) < 1e-9 && sammeHelning) {
+        s.push(`Balansert budsjett-endring: G og T endres like mye (${fortegn(pB.G - pA.G, 0)}). BNP endres likevel, fordi skatteøkningen bare reduserer konsumet med c·ΔT, mens G øker etterspørselen fullt ut. Den balanserte budsjettmultiplikatoren er (1 − c)/(1 − c + q) = ${fmt((1 - pB.c) / (1 - pB.c + pB.q), 2)}.`);
+      } else {
+        if (endret(pA, pB, "G")) s.push(pB.G > pA.G ? "Økte offentlige kjøp (G) er ekspansiv finanspolitikk. SE-kurven forskyves opp, og produksjonen øker til den nye likevekten." : "Reduserte offentlige kjøp (G) er kontraktiv finanspolitikk. SE-kurven forskyves ned, og BNP faller.");
+        if (endret(pA, pB, "T")) s.push(`${pB.T > pA.T ? "Høyere" : "Lavere"} skatter ${pB.T > pA.T ? "reduserer" : "øker"} disponibel inntekt (Y − T) og dermed konsumet. Skattemultiplikatoren er −c/(1 − c + q) = ${fmt(-pB.c / (1 - pB.c + pB.q), 2)}, altså mindre i tallverdi enn multiplikatoren for G.`);
+      }
+      if (endret(pA, pB, "I")) s.push(`${pB.I > pA.I ? "Økte" : "Lavere"} realinvesteringer (f.eks. pga. ${pB.I > pA.I ? "lavere rente eller bedre framtidsutsikter" : "høyere rente eller dårligere framtidsutsikter"}) forskyver SE-kurven ${pB.I > pA.I ? "opp" : "ned"}.`);
+      if (endret(pA, pB, "X")) s.push(`${pB.X > pA.X ? "Økt" : "Redusert"} eksport forskyver SE-kurven ${pB.X > pA.X ? "opp" : "ned"} og påvirker også handelsbalansen.`);
+      if (endret(pA, pB, "C0")) s.push(`${pB.C0 > pA.C0 ? "Økt" : "Redusert"} autonomt konsum (f.eks. pga. ${pB.C0 > pA.C0 ? "økt optimisme eller formue" : "pessimisme eller økt sparing"}) forskyver SE-kurven ${pB.C0 > pA.C0 ? "opp" : "ned"}.`);
+      if (endret(pA, pB, "c")) s.push(`${pB.c > pA.c ? "Høyere" : "Lavere"} marginal konsumtilbøyelighet gjør SE-kurven ${pB.c > pA.c ? "brattere" : "slakere"}, og multiplikatoren går fra ${fmt(mA, 2)} til ${fmt(mB, 2)}.`);
+      if (endret(pA, pB, "q")) s.push(`${pB.q > pA.q ? "Større" : "Mindre"} importtilbøyelighet betyr at ${pB.q > pA.q ? "mer" : "mindre"} av etterspørselen «lekker ut» til utlandet. Multiplikatoren går fra ${fmt(mA, 2)} til ${fmt(mB, 2)}.`);
+      if (sammeHelning && Math.abs(dAut) > 1e-9) {
+        s.push(`Regnestykket: Den autonome etterspørselen (C₀ − c·T + I + G + X) endret seg med ${fortegn(dAut, 1)}. Multiplikatoren er ${fmt(mB, 2)}, så BNP endres med ${fmt(mB, 2)} · ${fmt(dAut, 1)} = ${fortegn(mB * dAut, 1)}.`);
+      }
+      return s;
+    }
+  };
+  var adAs = {
+    id: "ad-as",
+    navn: "AD-AS-modellen",
+    beskrivelse: "Samlet etterspørsel AD: P = A − Y, kortsiktig samlet tilbud AS: P = K + 0,5·Y og langsiktig tilbud (LAS) loddrett ved potensielt BNP Yp. Viser produksjonsgap, etterspørselssjokk og tilbudssjokk.",
+    akser: { x: "BNP (Y)", y: "Prisnivå (P)" },
+    parametre: [
+      { id: "A", navn: "Samlet etterspørsel (A) – forskyver AD", min: 100, max: 200, steg: 5, start: 150 },
+      { id: "K", navn: "Kostnadsnivå (K) – forskyver AS", min: -50, max: 50, steg: 5, start: 0 },
+      { id: "Yp", navn: "Potensielt BNP (Yp) – forskyver LAS", min: 70, max: 130, steg: 5, start: 100 }
+    ],
+    beregn(p) {
+      const Y = (p.A - p.K) / 1.5;
+      const P = p.A - Y;
+      const gap = (Y - p.Yp) / p.Yp * 100;
+      return {
+        kurver: [
+          { id: "AD", navn: "AD (samlet etterspørsel)", farge: FARGER.ettersporsel, ...prøv(0, 200, (y) => p.A - y) },
+          { id: "AS", navn: "AS (samlet tilbud, kort sikt)", farge: FARGER.tilbud, ...prøv(0, 200, (y) => p.K + 0.5 * y) },
+          { id: "LAS", navn: "LAS (langsiktig tilbud = potensielt BNP)", farge: FARGER.gronn, strek: "dash", x: [p.Yp, p.Yp], y: [0, 200] }
+        ],
+        punkter: [{ navn: "Likevekt", x: Y, y: P, xEtikett: "Y", yEtikett: "P" }],
+        verdier: [
+          { id: "Y", navn: "BNP (Y)", verdi: Y },
+          { id: "P", navn: "Prisnivå (P)", verdi: P },
+          { id: "gap", navn: "Produksjonsgap (%)", verdi: gap }
+        ]
+      };
+    },
+    omrade() {
+      return { x: [0, 180], y: [0, 160] };
+    },
+    tolk(pA, pB, vA, vB) {
+      const s = [];
+      if (endret(pA, pB, "A")) s.push(pB.A > pA.A ? "AD forskyves mot høyre: økt samlet etterspørsel (f.eks. lavere rente, økte offentlige utgifter, skattelette eller økt eksport). På kort sikt øker både BNP og prisnivået." : "AD forskyves mot venstre: redusert samlet etterspørsel (f.eks. høyere rente, innstramming i finanspolitikken eller fall i eksporten). BNP og prisnivå faller.");
+      if (endret(pA, pB, "K")) s.push(pB.K > pA.K ? "AS forskyves oppover: et negativt tilbudssjokk (f.eks. høyere lønnskostnader eller dyrere energi/råvarer). Prisene stiger mens BNP faller. Kombinasjonen kalles stagflasjon." : "AS forskyves nedover: et positivt tilbudssjokk (f.eks. billigere råvarer eller høyere produktivitet). Prisene faller og BNP øker.");
+      if (endret(pA, pB, "Yp")) s.push(pB.Yp > pA.Yp ? "Potensielt BNP øker (LAS flyttes mot høyre), f.eks. pga. teknologisk fremgang, mer kapital eller større arbeidsstyrke." : "Potensielt BNP faller (LAS flyttes mot venstre), f.eks. pga. lavere produktivitet eller mindre arbeidsstyrke.");
+      const gap = vB.gap;
+      if (gap > 0.5) s.push(`Positivt produksjonsgap (${fmt(gap)} %): Økonomien er i høykonjunktur. Det er press i økonomien, lav ledighet og fare for økende inflasjon. Det kan begrunne en mer kontraktiv penge- eller finanspolitikk.`);
+      else if (gap < -0.5) s.push(`Negativt produksjonsgap (${fmt(gap)} %): Økonomien er i lavkonjunktur. Det er ledig kapasitet og høyere arbeidsledighet. Det kan begrunne en mer ekspansiv penge- eller finanspolitikk.`);
+      else s.push("BNP er omtrent lik potensielt BNP. Økonomien er nær langsiktig likevekt.");
+      return s;
+    }
+  };
+  var konjunktursykel = {
+    id: "konjunktursykel",
+    navn: "Konjunktursykel og trend",
+    beskrivelse: "BNP svinger rundt en voksende trend (potensielt BNP): Y(t) = 100·(1 + g)^t · (1 + A·sin(2πt/T)). Viser høykonjunktur, lavkonjunktur og produksjonsgap på et valgt tidspunkt.",
+    akser: { x: "Tid (år)", y: "BNP (indeks, år 0 = 100)" },
+    parametre: [
+      { id: "g", navn: "Trendvekst (% per år)", min: 0, max: 5, steg: 0.5, start: 2 },
+      { id: "A", navn: "Amplitude – hvor store svingningene er (%)", min: 0, max: 10, steg: 0.5, start: 4 },
+      { id: "T", navn: "Lengde på én konjunktursykel (år)", min: 4, max: 12, steg: 1, start: 8 },
+      { id: "t", navn: "Valgt tidspunkt (år)", min: 0, max: 20, steg: 0.25, start: 3 }
+    ],
+    hjelp: {
+      trend: (p, t) => 100 * Math.pow(1 + p.g / 100, t),
+      bnp: (p, t) => 100 * Math.pow(1 + p.g / 100, t) * (1 + p.A / 100 * Math.sin(2 * Math.PI * t / p.T)),
+      fase(p) {
+        const v = 2 * Math.PI * p.t / p.T;
+        const gap = p.A * Math.sin(v);
+        const stiger = Math.cos(v) > 0;
+        if (p.A === 0) return "Ingen svingninger – BNP følger trenden.";
+        if (Math.abs(gap) < p.A * 0.15) return stiger ? "BNP er rundt trendnivået og på vei opp (oppgangskonjunktur)." : "BNP er rundt trendnivået og på vei ned (nedgangskonjunktur).";
+        if (gap > 0) return stiger ? "Høykonjunktur på vei mot toppen: BNP er over trend og stiger fortsatt." : "Høykonjunktur der toppen er passert: BNP er over trend, men på vei ned.";
+        return stiger ? "Lavkonjunktur der bunnen er passert: BNP er under trend, men på vei opp." : "Lavkonjunktur på vei mot bunnen: BNP er under trend og faller.";
+      }
+    },
+    beregn(p) {
+      const h = this.hjelp;
+      const gap = p.A * Math.sin(2 * Math.PI * p.t / p.T);
+      return {
+        kurver: [
+          { id: "trend", navn: "Trend-BNP (potensielt BNP)", farge: FARGER.gronn, strek: "dash", ...prøv(0, 20, (t) => h.trend(p, t), 100) },
+          { id: "bnp", navn: "Faktisk BNP", farge: FARGER.ettersporsel, ...prøv(0, 20, (t) => h.bnp(p, t), 400) }
+        ],
+        punkter: [{ navn: "Valgt tidspunkt", x: p.t, y: h.bnp(p, p.t), xEtikett: "t" }],
+        verdier: [
+          { id: "bnp", navn: "BNP på valgt tidspunkt", verdi: h.bnp(p, p.t) },
+          { id: "trend", navn: "Trend-BNP på valgt tidspunkt", verdi: h.trend(p, p.t) },
+          { id: "gap", navn: "Produksjonsgap (%)", verdi: gap }
+        ]
+      };
+    },
+    omrade(pA, pB) {
+      const maks = Math.max(this.hjelp.trend(pA, 20), this.hjelp.trend(pB, 20)) * (1 + Math.max(pA.A, pB.A) / 100);
+      return { x: [0, 20], y: [Math.min(85, 100 - Math.max(pA.A, pB.A) - 3), Math.ceil((maks + 5) / 10) * 10] };
+    },
+    tolk(pA, pB) {
+      const s = [this.hjelp.fase(pB)];
+      if (endret(pA, pB, "g")) s.push(`Trendveksten ${pB.g > pA.g ? "økte" : "falt"}. Trendveksten bestemmes på lang sikt av tilbudssiden: teknologi, kapital, arbeidskraft og kompetanse.`);
+      if (endret(pA, pB, "A")) s.push(`Svingningene ble ${pB.A > pA.A ? "større" : "mindre"}. Stabiliseringspolitikk (penge- og finanspolitikk) har som mål å dempe konjunktursvingningene.`);
+      if (endret(pA, pB, "T")) s.push(`Hver konjunktursykel varer nå ${fmt(pB.T, 0)} år fra topp til topp.`);
+      return s;
+    }
+  };
+  var isLm = {
+    id: "is-lm",
+    navn: "IS-LM-modellen",
+    beskrivelse: "IS-kurven (likevekt i varemarkedet): r = (200 + G − Y/2)/20. LM-kurven (likevekt i pengemarkedet): r = (0,5·Y − M)/25. Viser hvordan finanspolitikk (G) og pengepolitikk (M) påvirker BNP og rente.",
+    akser: { x: "BNP (Y)", y: "Rente (r, %)" },
+    parametre: [
+      { id: "G", navn: "Offentlige utgifter (G) – forskyver IS", min: 0, max: 300, steg: 10, start: 100 },
+      { id: "M", navn: "Pengemengde (M) – forskyver LM", min: 50, max: 400, steg: 10, start: 200 }
+    ],
+    beregn(p) {
+      const Y = (5e3 + 25 * p.G + 20 * p.M) / 22.5;
+      const r = (200 + p.G - Y / 2) / 20;
+      return {
+        kurver: [
+          { id: "IS", navn: "IS (varemarkedet)", farge: FARGER.ettersporsel, ...prøv(0, 1200, (y) => (200 + p.G - y / 2) / 20) },
+          { id: "LM", navn: "LM (pengemarkedet)", farge: FARGER.tilbud, ...prøv(0, 1200, (y) => (0.5 * y - p.M) / 25) }
+        ],
+        punkter: [{ navn: "Likevekt", x: Y, y: r, xEtikett: "Y*", yEtikett: "r*" }],
+        verdier: [
+          { id: "Y", navn: "BNP (Y*)", verdi: Y },
+          { id: "r", navn: "Rente (r*, %)", verdi: r, desimaler: 2 }
+        ]
+      };
+    },
+    omrade() {
+      return { x: [0, 1e3], y: [0, 15] };
+    },
+    tolk(pA, pB) {
+      const s = [];
+      if (endret(pA, pB, "G")) s.push(pB.G > pA.G ? "Ekspansiv finanspolitikk forskyver IS mot høyre. BNP øker, men renten stiger også. Den høyere renten demper private investeringer (fortrengning, «crowding out»), så BNP øker mindre enn i den enkle keynesianske modellen." : "Kontraktiv finanspolitikk forskyver IS mot venstre. BNP og rente faller.");
+      if (endret(pA, pB, "M")) s.push(pB.M > pA.M ? "Ekspansiv pengepolitikk (økt pengemengde) forskyver LM mot høyre. Renten faller, noe som stimulerer investeringer og konsum, og BNP øker." : "Kontraktiv pengepolitikk (redusert pengemengde) forskyver LM mot venstre. Renten stiger og BNP faller.");
+      s.push("I Norge styrer Norges Bank renten direkte gjennom styringsrenten, i stedet for pengemengden. Virkningen på etterspørselen er den samme: lavere rente gir høyere etterspørsel.");
+      return s;
+    }
+  };
+  var arbeidsmarked = {
+    id: "arbeidsmarked",
+    navn: "Arbeidsmarkedet",
+    beskrivelse: "Etterspørsel etter arbeidskraft W = a − N og tilbud av arbeidskraft W = c + N. En minstelønn over likevektslønnen gir arbeidsledighet (tilbudsoverskudd).",
+    akser: { x: "Sysselsetting / antall arbeidere (N)", y: "Reallønn (W/P)" },
+    parametre: [
+      { id: "a", navn: "Etterspørsel etter arbeidskraft (a) – f.eks. produktivitet og produktpriser", min: 100, max: 300, steg: 10, start: 200 },
+      { id: "c", navn: "Tilbud av arbeidskraft (c) – laveste lønn folk vil jobbe for", min: 0, max: 100, steg: 5, start: 50 },
+      { id: "Wmin", navn: "Minstelønn (0 = ingen minstelønn)", min: 0, max: 250, steg: 5, start: 0 }
+    ],
+    beregn(p) {
+      const Nl = Math.max(0, (p.a - p.c) / 2);
+      const Wl = (p.a + p.c) / 2;
+      const bindende = p.Wmin > Wl;
+      const N = bindende ? Math.max(0, p.a - p.Wmin) : Nl;
+      const W = bindende ? p.Wmin : Wl;
+      const tilbudt = bindende ? Math.max(0, p.Wmin - p.c) : Nl;
+      const kurver = [
+        { id: "D", navn: "Etterspørsel etter arbeidskraft (bedriftene)", farge: FARGER.ettersporsel, ...prøv(0, p.a, (n) => p.a - n) },
+        { id: "S", navn: "Tilbud av arbeidskraft (arbeidstakerne)", farge: FARGER.tilbud, ...prøv(0, 300, (n) => p.c + n) }
+      ];
+      const punkter = [{ navn: bindende ? "Sysselsetting med minstelønn" : "Likevekt", x: N, y: W, xEtikett: "N", yEtikett: "W" }];
+      if (p.Wmin > 0) kurver.push({ id: "min", navn: "Minstelønn", farge: FARGER.lilla, strek: "dot", x: [0, 300], y: [p.Wmin, p.Wmin] });
+      if (bindende) punkter.push({ navn: "Ønsket arbeidstilbud", x: tilbudt, y: W, bi: true });
+      return {
+        kurver,
+        punkter,
+        verdier: [
+          { id: "N", navn: "Sysselsetting (N)", verdi: N },
+          { id: "W", navn: "Reallønn (W/P)", verdi: W },
+          { id: "L", navn: "Arbeidsledighet (tilbud − sysselsetting)", verdi: tilbudt - N }
+        ]
+      };
+    },
+    omrade() {
+      return { x: [0, 250], y: [0, 300] };
+    },
+    tolk(pA, pB, vA, vB) {
+      const s = [];
+      if (endret(pA, pB, "a")) s.push(pB.a > pA.a ? "Etterspørselen etter arbeidskraft øker (f.eks. høyere produktivitet eller økt etterspørsel etter varene). Både lønn og sysselsetting øker." : "Etterspørselen etter arbeidskraft faller (f.eks. lavkonjunktur). Lønn og sysselsetting går ned.");
+      if (endret(pA, pB, "c")) s.push(pB.c > pA.c ? "Tilbudet av arbeidskraft går ned (f.eks. færre i arbeidsfør alder). Lønnen stiger, sysselsettingen faller." : "Tilbudet av arbeidskraft øker (f.eks. arbeidsinnvandring). Lønnen faller, sysselsettingen øker.");
+      if (vB.L > 0.01) s.push(`Minstelønnen ligger over likevektslønnen. Flere vil jobbe enn bedriftene vil ansette, så det oppstår arbeidsledighet på ${fmt(vB.L)}.`);
+      else if (pB.Wmin > 0) s.push("Minstelønnen ligger under likevektslønnen og har ingen virkning.");
+      return s;
+    }
+  };
+  var phillips = {
+    id: "phillips",
+    navn: "Phillipskurven",
+    beskrivelse: "Forventningsutvidet Phillipskurve: π = πᵉ − β·(u − u*). Lav arbeidsledighet gir høy inflasjon på kort sikt. På lang sikt er Phillipskurven loddrett ved likevektsledigheten u*.",
+    akser: { x: "Arbeidsledighet (u, %)", y: "Inflasjon (π, %)" },
+    parametre: [
+      { id: "pe", navn: "Forventet inflasjon (πᵉ, %)", min: 0, max: 8, steg: 0.5, start: 2 },
+      { id: "un", navn: "Likevektsledighet (u*, %)", min: 2, max: 8, steg: 0.5, start: 4 },
+      { id: "b", navn: "Helning (β)", min: 0.2, max: 2, steg: 0.1, start: 0.8 },
+      { id: "u", navn: "Faktisk arbeidsledighet (u, %)", min: 1, max: 10, steg: 0.25, start: 4 }
+    ],
+    beregn(p) {
+      const pi = p.pe - p.b * (p.u - p.un);
+      return {
+        kurver: [
+          { id: "SPK", navn: "Kortsiktig Phillipskurve", farge: FARGER.ettersporsel, ...prøv(0, 12, (u) => p.pe - p.b * (u - p.un)) },
+          { id: "LPK", navn: "Langsiktig Phillipskurve (u = u*)", farge: FARGER.gronn, strek: "dash", x: [p.un, p.un], y: [-6, 16] },
+          { id: "mal", navn: "Inflasjonsmål (2 %)", farge: FARGER.hjelp, strek: "dot", x: [0, 12], y: [2, 2] }
+        ],
+        punkter: [{ navn: "Økonomien nå", x: p.u, y: pi, xEtikett: "u", yEtikett: "π" }],
+        verdier: [
+          { id: "pi", navn: "Inflasjon (π, %)", verdi: pi },
+          { id: "u", navn: "Arbeidsledighet (u, %)", verdi: p.u },
+          { id: "avvik", navn: "Avvik fra inflasjonsmålet (prosentpoeng)", verdi: pi - 2 }
+        ]
+      };
+    },
+    omrade() {
+      return { x: [0, 12], y: [-4, 12] };
+    },
+    tolk(pA, pB, vA, vB) {
+      const s = [];
+      if (endret(pA, pB, "u")) s.push(pB.u < pA.u ? "Lavere arbeidsledighet gir et strammere arbeidsmarked. Lønningene stiger raskere, og det gir høyere inflasjon (bevegelse langs kurven)." : "Høyere arbeidsledighet demper lønnsveksten og gir lavere inflasjon (bevegelse langs kurven).");
+      if (endret(pA, pB, "pe")) s.push(pB.pe > pA.pe ? "Høyere forventet inflasjon forskyver hele kurven opp. Ved samme ledighet blir inflasjonen høyere. Derfor er det viktig at inflasjonsforventningene er forankret rundt inflasjonsmålet." : "Lavere forventet inflasjon forskyver kurven ned.");
+      if (endret(pA, pB, "un")) s.push("Likevektsledigheten bestemmes av strukturelle forhold, f.eks. lønnsdannelse, utdanning og hvor godt arbeidsmarkedet fungerer.");
+      if (pB.u < pB.un) s.push("Ledigheten er under likevektsledigheten, så inflasjonen blir høyere enn forventet. Over tid vil forventningene justeres opp, og kurven flyttes oppover.");
+      else if (pB.u > pB.un) s.push("Ledigheten er over likevektsledigheten, så inflasjonen blir lavere enn forventet.");
+      return s;
+    }
+  };
+  var MALER = {
+    [tilbudEttersporsel.id]: tilbudEttersporsel,
+    [keynesKryss.id]: keynesKryss,
+    [adAs.id]: adAs,
+    [konjunktursykel.id]: konjunktursykel,
+    [isLm.id]: isLm,
+    [arbeidsmarked.id]: arbeidsmarked,
+    [phillips.id]: phillips
+  };
+  var MAL_IDER = Object.keys(MALER);
+  function malKatalog() {
+    return Object.values(MALER).map((m) => {
+      const p = m.parametre.map((x) => `    - ${x.id}: ${x.navn} (min ${x.min}, maks ${x.max}, standard ${x.start})`).join("\n");
+      return `- mal "${m.id}" – ${m.navn}: ${m.beskrivelse}
+  Akser: x = ${m.akser.x}, y = ${m.akser.y}
+  Parametre:
+${p}`;
+    }).join("\n");
+  }
+  function lagFriMal(spek) {
+    const palett = [FARGER.ettersporsel, FARGER.tilbud, FARGER.gronn, FARGER.lilla, FARGER.oransje, FARGER.hjelp];
+    const kurver = spek.kurver.map((k, i) => ({ ...k, farge: palett[i % palett.length], f: kompiler(k.uttrykk) }));
+    const [x0, x1] = [spek.xAkse.min, spek.xAkse.max];
+    function verdiAv(k, p, x) {
+      try {
+        return k.f({ ...p, x });
+      } catch {
+        return NaN;
+      }
+    }
+    function skjæring(k1, k2, p) {
+      if (k1.type === "loddrett" && k2.type === "loddrett") return null;
+      if (k1.type === "loddrett" || k2.type === "loddrett") {
+        const [l, a] = k1.type === "loddrett" ? [k1, k2] : [k2, k1];
+        const x = verdiAv(l, p, 0);
+        return { x, y: verdiAv(a, p, x) };
+      }
+      const n = 600;
+      let forrige = null;
+      for (let i = 0; i <= n; i++) {
+        const x = x0 + (x1 - x0) * i / n;
+        const d = verdiAv(k1, p, x) - verdiAv(k2, p, x);
+        if (!isFinite(d)) {
+          forrige = null;
+          continue;
+        }
+        if (forrige && Math.sign(d) !== Math.sign(forrige.d)) {
+          let a = forrige.x, b = x;
+          for (let j = 0; j < 50; j++) {
+            const m = (a + b) / 2;
+            const dm = verdiAv(k1, p, m) - verdiAv(k2, p, m);
+            if (Math.sign(dm) === Math.sign(verdiAv(k1, p, a) - verdiAv(k2, p, a))) a = m;
+            else b = m;
+          }
+          const xs = (a + b) / 2;
+          return { x: xs, y: verdiAv(k1, p, xs) };
+        }
+        if (d === 0) return { x, y: verdiAv(k1, p, x) };
+        forrige = { x, d };
+      }
+      return null;
+    }
+    return {
+      id: "fri",
+      navn: spek.tittel || "Graf",
+      akser: { x: spek.xAkse.navn, y: spek.yAkse.navn },
+      parametre: spek.parametre,
+      beregn(p) {
+        const ut = kurver.map((k) => {
+          if (k.type === "loddrett") {
+            const x = verdiAv(k, p, 0);
+            return { id: k.id, navn: k.navn, farge: k.farge, x: [x, x], y: [spek.yAkse.min, spek.yAkse.max] };
+          }
+          const data = prøv(x0, x1, (x) => verdiAv(k, p, x), 300);
+          return { id: k.id, navn: k.navn, farge: k.farge, x: data.x, y: data.y.map((y) => isFinite(y) ? y : null) };
+        });
+        const punkter = [];
+        const verdier = [];
+        (spek.skjaeringer || []).forEach((s, i) => {
+          const k1 = kurver.find((k) => k.id === s.kurve1);
+          const k2 = kurver.find((k) => k.id === s.kurve2);
+          if (!k1 || !k2) return;
+          const pkt = skjæring(k1, k2, p);
+          if (!pkt || !isFinite(pkt.x) || !isFinite(pkt.y)) return;
+          const navn = s.navn || `Skjæringspunkt ${i + 1}`;
+          punkter.push({ navn, x: pkt.x, y: pkt.y });
+          verdier.push({ id: `x${i}`, navn: `${navn}: ${spek.xAkse.navn}`, verdi: pkt.x });
+          verdier.push({ id: `y${i}`, navn: `${navn}: ${spek.yAkse.navn}`, verdi: pkt.y });
+        });
+        return { kurver: ut, punkter, verdier };
+      },
+      omrade() {
+        return { x: [spek.xAkse.min, spek.xAkse.max], y: [spek.yAkse.min, spek.yAkse.max] };
+      },
+      tolk() {
+        return [];
+      }
+    };
+  }
+  function malFor(graf2) {
+    if (graf2.mal === "fri") {
+      if (!graf2.fri) throw new Error("Grafen mangler beskrivelse.");
+      return lagFriMal({ ...graf2.fri, tittel: graf2.tittel });
+    }
+    const mal = MALER[graf2.mal];
+    if (!mal) throw new Error(`Ukjent grafmal «${graf2.mal}».`);
+    return mal;
+  }
+  function startParametre(mal, startverdier2 = []) {
+    const parametre = mal.parametre.map((p) => ({ ...p }));
+    const verdier = {};
+    for (const p of parametre) verdier[p.id] = p.start;
+    for (const { id, verdi } of startverdier2 || []) {
+      const p = parametre.find((x) => x.id === id);
+      if (!p || typeof verdi !== "number" || !isFinite(verdi)) continue;
+      verdier[id] = verdi;
+      if (verdi < p.min) p.min = verdi;
+      if (verdi > p.max) p.max = verdi;
+    }
+    return { parametre, verdier };
+  }
+
+  // public/js/prompter.js
+  var TEMALISTE = TEMAER.map((t) => `- ${t.id}: ${t.navn}`).join("\n");
+  var FELLES = `Du er en erfaren og tålmodig lærer i faget ${FAG_NAVN} på videregående skole i Norge (læreplan LK20).
+Du hjelper en elev med å forstå faget. Skriv alltid på norsk bokmål, med et enkelt og presist språk som en elev på vg2/vg3 forstår.
+Bruk faglig korrekte norske økonomiske begreper (f.eks. BNP, samlet etterspørsel, produksjonsgap, styringsrente, marginal konsumtilbøyelighet, handlingsregelen).
+Når du skriver tall, bruk desimalkomma i teksten (f.eks. 0,6).
+
+Temaene i faget (bruk disse id-ene):
+${TEMALISTE}`;
+  var GRAF_INSTRUKS = `GRAFER:
+Appen tegner interaktive grafer selv. Du beskriver dem bare som data. Det finnes ferdige grafmaler med riktige formler:
+${malKatalog()}
+
+Regler for grafer:
+- Bruk en ferdig mal når modellen passer. Velg startverdier (id + verdi) som passer til eksempelet i teksten, ellers kan startverdier være en tom liste. Sett "fri" til null.
+- Bruk mal "fri" bare når ingen ferdig mal passer (f.eks. valutamarked, Laffer-kurve, Lorenz-kurve, produksjonsfunksjon). Da fyller du ut "fri":
+  - xAkse/yAkse: norsk aksenavn med symbol, f.eks. "Valutakurs (kroner per euro)", og fornuftige min/max.
+  - parametre: glidebrytere med kort id (bokstaver), norsk navn, min, max, steg og start.
+  - kurver: uttrykk for y som funksjon av x og parameter-id-ene (type "y_av_x"), eller en loddrett linje der uttrykket gir x-verdien (type "loddrett"). Lov i uttrykk: tall med punktum som desimaltegn, x, parameter-id-er, + - * / ^, parenteser, sqrt, ln, exp, min, max. Skriv alltid * for gange.
+  - skjaeringer: hvilke kurvepar som har et likevektspunkt som skal markeres.
+- "kobling": én setning om hvordan grafen henger sammen med teksten.
+- Ikke lag grafer som ikke er relevante.`;
+  function analyseTekst(antallFiler, notat) {
+    return `Her er ${antallFiler === 1 ? "en side" : `${antallFiler} filer`} fra læreboka eller notatene mine i ${FAG_NAVN}.
+${notat ? `Min kommentar: ${notat}
+` : ""}
+Analyser innholdet og gi:
+- lesbar: false hvis du ikke klarer å lese innholdet (da kan resten være kort)
+- tittel: kort, beskrivende tittel
+- sammendrag: et sammenhengende sammendrag (ca. 150–300 ord) skrevet for å kunne leses høyt. Ikke bruk punktlister, formler med spesialtegn eller forkortelser som er vanskelige å lese høyt.
+- hovedpoenger: 3–8 korte hovedpoenger
+- temaer: hvilke temaer i faget siden handler om (1–3 stk.)
+- begreper: viktige fagbegreper fra siden med enkel forklaring, et konkret eksempel (gjerne fra norsk økonomi) og tema
+- grafer: 0–3 interaktive grafer som hjelper meg å forstå stoffet
+
+${GRAF_INSTRUKS}`;
+  }
+  function oppgaveTekst(kontekst, antall, nivå) {
+    const tekst3 = `Lag øvingsoppgaver basert på dette stoffet som jeg har lest:
+
+${kontekst}
+
+Lag disse oppgavene (antallet er viktig):
+- ${antall.flervalg} flervalgsoppgaver (type "flervalg"): 4 alternativer, riktigAlternativ er indeksen (0–3) til riktig svar. Plasser riktig svar på ulike posisjoner.
+- ${antall.regning} korte regneoppgaver (type "regning"): ett tallsvar i fasitTall, enhet (f.eks. "mrd. kr", "%" eller tom), toleranse = hvor mye svaret kan avvike og fortsatt regnes som riktig (f.eks. 0,5 % av svaret, minst avrundingsfeil).
+- ${antall.drofting} drøftingsoppgaver (type "drofting") som ligner på eksamen i ${FAG_NAVN} (f.eks. «Drøft hvilke virkninger …», «Gjør rede for … og drøft …»). Gi 3–6 vurderingskriterier.
+- ${antall.graf} grafoppgaver (type "graf"): Eleven skal flytte riktig glidebryter i en ferdig grafmal. Beskriv en hendelse i sporsmal, f.eks. «Staten øker offentlige kjøp av varer og tjenester. Flytt riktig kurve.». Fyll ut graf med mal, startverdier, riktigParameter (id-en til parameteren som skal endres) og riktigRetning ("opp" = høyere verdi, "ned" = lavere verdi). Ikke avslør i spørsmålet hvilken parameter som skal flyttes.
+
+Nivå: ${nivå}.
+For alle oppgaver: losningsforslag skal forklare løsningen steg for steg (for regning: vis utregningen; for drøfting: et kort modellsvar med de viktigste momentene; for graf: hvorfor denne kurven flyttes og hva som skjer med likevekten).
+Felter som ikke gjelder oppgavetypen fylles slik: alternativer [], riktigAlternativ -1, fasitTall 0, enhet "", toleranse 0, vurderingskriterier [], graf null.
+
+Grafmaler som kan brukes i grafoppgaver:
+${malKatalog()}`;
+    return tekst3;
+  }
+  function vurderingTekst({ sporsmal, vurderingskriterier, losningsforslag, svar }) {
+    const tekst3 = `Vurder elevens svar på denne drøftingsoppgaven.
+
+OPPGAVE: ${sporsmal}
+
+VURDERINGSKRITERIER:
+${(vurderingskriterier || []).map((k) => `- ${k}`).join("\n")}
+
+LØSNINGSFORSLAG (til deg som lærer):
+${losningsforslag}
+
+ELEVENS SVAR:
+"""
+${svar}
+"""
+
+Gi:
+- tilbakemelding: en kort, oppmuntrende og ærlig helhetsvurdering (3–5 setninger)
+- styrker: hva eleven gjør bra
+- forbedringer: konkrete tips for å få bedre uttelling på eksamen (f.eks. bruk av begreper, modeller, grafer, drøfting av flere sider, konklusjon)
+- karakter: omtrentlig karakter 1–6 slik en sensor ville vurdert svaret ut fra lengde og kvalitet
+- modellsvar: et godt eksempel på et svar (ca. 200–350 ord)`;
+    return tekst3;
+  }
+
+  // server/skjema.js
+  var tekst = { type: "string" };
+  var tall = { type: "number" };
+  var tekstliste = { type: "array", items: tekst };
+  var tema = { type: "string", enum: TEMA_IDER };
+  function objekt(properties) {
+    return { type: "object", additionalProperties: false, required: Object.keys(properties), properties };
+  }
+  var startverdier = {
+    type: "array",
+    items: objekt({ id: tekst, verdi: tall })
+  };
+  var friGraf = objekt({
+    xAkse: objekt({ navn: tekst, min: tall, max: tall }),
+    yAkse: objekt({ navn: tekst, min: tall, max: tall }),
+    parametre: {
+      type: "array",
+      items: objekt({ id: tekst, navn: tekst, min: tall, max: tall, steg: tall, start: tall })
+    },
+    kurver: {
+      type: "array",
+      items: objekt({ id: tekst, navn: tekst, type: { type: "string", enum: ["y_av_x", "loddrett"] }, uttrykk: tekst })
+    },
+    skjaeringer: {
+      type: "array",
+      items: objekt({ kurve1: tekst, kurve2: tekst, navn: tekst })
+    }
+  });
+  var graf = objekt({
+    mal: { type: "string", enum: [...MAL_IDER, "fri"] },
+    tittel: tekst,
+    kobling: tekst,
+    startverdier,
+    fri: { anyOf: [friGraf, { type: "null" }] }
+  });
+  var ANALYSE_SKJEMA = objekt({
+    lesbar: { type: "boolean" },
+    tittel: tekst,
+    sammendrag: tekst,
+    hovedpoenger: tekstliste,
+    temaer: { type: "array", items: tema },
+    begreper: {
+      type: "array",
+      items: objekt({ begrep: tekst, forklaring: tekst, eksempel: tekst, tema })
+    },
+    grafer: { type: "array", items: graf }
+  });
+  var grafOppgave = objekt({
+    mal: { type: "string", enum: MAL_IDER },
+    startverdier,
+    riktigParameter: tekst,
+    riktigRetning: { type: "string", enum: ["opp", "ned"] }
+  });
+  var OPPGAVE_SKJEMA = objekt({
+    oppgaver: {
+      type: "array",
+      items: objekt({
+        type: { type: "string", enum: ["flervalg", "regning", "drofting", "graf"] },
+        tema,
+        sporsmal: tekst,
+        alternativer: tekstliste,
+        riktigAlternativ: { type: "integer" },
+        fasitTall: tall,
+        enhet: tekst,
+        toleranse: tall,
+        losningsforslag: tekst,
+        vurderingskriterier: tekstliste,
+        graf: { anyOf: [grafOppgave, { type: "null" }] }
+      })
+    }
+  });
+  var VURDERING_SKJEMA = objekt({
+    tilbakemelding: tekst,
+    styrker: tekstliste,
+    forbedringer: tekstliste,
+    karakter: { type: "integer", enum: [1, 2, 3, 4, 5, 6] },
+    modellsvar: tekst
+  });
+  var FORKLAR_SKJEMA = objekt({
+    forklaring: tekst
+  });
+
+  // public/js/visninger/oversikt.js
+  var oversikt_exports = {};
+  __export(oversikt_exports, {
+    vis: () => vis
+  });
+
+  // public/js/demo.js
+  function demoAnalyse() {
+    return {
+      lesbar: true,
+      tittel: "Demo: Den keynesianske modellen og finanspolitikk",
+      sammendrag: "Dette er et eksempel fra demo-modus. Siden handler om hvordan samlet etterspørsel bestemmer produksjonen i økonomien på kort sikt. I den keynesianske modellen er BNP lik summen av privat konsum, realinvesteringer, offentlig kjøp av varer og tjenester og eksport, minus import. Konsumet avhenger av disponibel inntekt, og hvor mye av en ekstra krone som går til konsum, kalles den marginale konsumtilbøyeligheten. Når staten øker sine kjøp, øker inntektene til husholdningene, som igjen bruker mer penger. Slik får vi en multiplikatoreffekt, der BNP øker mer enn den første økningen i offentlige kjøp. Import virker som en lekkasje, fordi en del av etterspørselen går til produksjon i andre land. Derfor er multiplikatoren mindre i en åpen økonomi som den norske.",
+      hovedpoenger: [
+        "På kort sikt bestemmes BNP av samlet etterspørsel: Y = C + I + G + X − Q.",
+        "Privat konsum avhenger av disponibel inntekt (Y − T).",
+        "Multiplikatoren viser hvor mye BNP endres når den autonome etterspørselen endres med én krone.",
+        "Høy importtilbøyelighet gir en mindre multiplikator.",
+        "Ekspansiv finanspolitikk betyr økte offentlige utgifter eller lavere skatter."
+      ],
+      temaer: ["makromodell", "finanspolitikk"],
+      begreper: [
+        { begrep: "Marginal konsumtilbøyelighet", forklaring: "Hvor stor del av en ekstra krone i disponibel inntekt som brukes til konsum.", eksempel: "Hvis du får 100 kr mer og bruker 60 kr, er den marginale konsumtilbøyeligheten 0,6.", tema: "makromodell" },
+        { begrep: "Multiplikator", forklaring: "Tallet som viser hvor mye BNP endres når en autonom etterspørselskomponent (f.eks. G) endres med én enhet.", eksempel: "Med multiplikator 1,67 gir 10 mrd. kr økte offentlige kjøp ca. 16,7 mrd. kr høyere BNP.", tema: "makromodell" },
+        { begrep: "Ekspansiv finanspolitikk", forklaring: "Når staten øker utgiftene eller senker skattene for å øke samlet etterspørsel.", eksempel: "Under koronapandemien brukte Norge mer oljepenger for å holde aktiviteten oppe.", tema: "finanspolitikk" },
+        { begrep: "Disponibel inntekt", forklaring: "Inntekten husholdningene har igjen etter skatt, og som de kan bruke til konsum eller sparing.", eksempel: "Lønn på 500 000 kr minus 150 000 kr i skatt gir 350 000 kr i disponibel inntekt.", tema: "makromodell" }
+      ],
+      grafer: [
+        { mal: "keynes-kryss", tittel: "Multiplikatoreffekten", kobling: "Viser hvordan økte offentlige kjøp (G) øker BNP gjennom multiplikatoren.", startverdier: [], fri: null },
+        { mal: "ad-as", tittel: "Finanspolitikk i AD-AS-modellen", kobling: "Ekspansiv finanspolitikk forskyver AD mot høyre.", startverdier: [{ id: "A", verdi: 140 }], fri: null },
+        {
+          mal: "fri",
+          tittel: "Valutamarkedet (fri graf)",
+          kobling: "Eksempel på en graf Claude beskriver med egne likninger.",
+          startverdier: [],
+          fri: {
+            xAkse: { navn: "Mengde euro (mrd.)", min: 0, max: 100 },
+            yAkse: { navn: "Valutakurs (kroner per euro)", min: 0, max: 20 },
+            parametre: [
+              { id: "e", navn: "Etterspørsel etter euro (f.eks. import)", min: 10, max: 20, steg: 0.5, start: 15 },
+              { id: "s", navn: "Tilbud av euro (f.eks. eksport)", min: 0, max: 10, steg: 0.5, start: 5 }
+            ],
+            kurver: [
+              { id: "D", navn: "Etterspørsel etter euro", type: "y_av_x", uttrykk: "e - 0.1*x" },
+              { id: "S", navn: "Tilbud av euro", type: "y_av_x", uttrykk: "s + 0.1*x" }
+            ],
+            skjaeringer: [{ kurve1: "D", kurve2: "S", navn: "Likevektskurs" }]
+          }
+        }
+      ]
+    };
+  }
+
+  // public/js/visninger/oversikt.js
+  async function vis(main2, deler, query) {
+    const [leveranser, begreper, sett] = await Promise.all([hentAlle("leveranser"), hentAlle("begreper"), hentAlle("oppgavesett")]);
+    leveranser.sort((a, b) => b.dato - a.dato);
+    let besvart = 0, riktige = 0;
+    for (const s of sett) for (const o of s.oppgaver) {
+      if (o.resultat && typeof o.resultat.riktig === "boolean") {
+        besvart++;
+        if (o.resultat.riktig) riktige++;
+      }
+    }
+    const valgtTema = query.tema;
+    const telling = {};
+    for (const l of leveranser) for (const t of l.analyse.temaer || []) telling[t] = (telling[t] || 0) + 1;
+    const liste2 = valgtTema ? leveranser.filter((l) => (l.analyse.temaer || []).includes(valgtTema)) : leveranser;
+    main2.innerHTML = `
+    <h1>Samfunnsøkonomi 2</h1>
+    <div class="statistikk">
+      <div class="stat"><strong>${leveranser.length}</strong><span>leverte sider</span></div>
+      <div class="stat"><strong>${begreper.length}</strong><span>begreper i ordlisten</span></div>
+      <div class="stat"><strong>${besvart}</strong><span>oppgaver rettet</span></div>
+      <div class="stat"><strong>${besvart ? Math.round(riktige / besvart * 100) + " %" : "–"}</strong><span>riktige svar</span></div>
+    </div>
+
+    ${leveranser.length === 0 ? `
+      <div class="kort tom">
+        <h2>Velkommen! 👋</h2>
+        <p>Start med å levere inn en side fra læreboka eller notatene dine. Du kan bruke et bilde eller en PDF.</p>
+        <p>Claude lager et sammendrag og finner temaer og begreper. Appen lager interaktive grafer og oppgaver du kan øve på.</p>
+        <div class="handlinger midt-rad">
+          <a class="knapp" href="#/lever">📄 Lever din første side</a>
+          <button class="knapp lys eksempel" type="button">Prøv med en eksempelside</button>
+        </div>
+      </div>` : ""}
+
+    <section class="kort">
+      <h2>Temaer i faget</h2>
+      <p class="dempet">Trykk på et tema for å se sidene du har levert om det.</p>
+      <div class="temanett">
+        ${TEMAER.map((t) => `
+          <a class="tema ${telling[t.id] ? "har" : ""} ${valgtTema === t.id ? "valgt" : ""}" href="#/oversikt?tema=${t.id}">
+            <span>${esc(t.navn)}</span><small>${telling[t.id] || 0} sider</small>
+          </a>`).join("")}
+      </div>
+    </section>
+
+    ${leveranser.length ? `
+    <section class="kort">
+      <div class="rad-mellom">
+        <h2>${valgtTema ? `Sider om «${esc(temaNavn(valgtTema))}»` : "Alle leverte sider"}</h2>
+        ${valgtTema ? '<a class="knapp liten lys" href="#/oversikt">Vis alle</a>' : '<a class="knapp liten" href="#/lever">+ Lever ny side</a>'}
+      </div>
+      ${liste2.length === 0 ? '<p class="dempet">Ingen sider om dette temaet ennå.</p>' : `
+      <ul class="leveranseliste">
+        ${liste2.map((l) => `
+          <li>
+            <a href="#/side/${l.id}">
+              <strong>${esc(l.analyse.tittel)}</strong>
+              <span class="dempet">${dato(l.dato)} · ${l.filer.length} fil${l.filer.length === 1 ? "" : "er"}${l.notat ? " · " + esc(l.notat) : ""}</span>
+            </a>
+            <div>${temaChips(l.analyse.temaer)}</div>
+          </li>`).join("")}
+      </ul>`}
+    </section>` : ""}
+  `;
+    main2.querySelector(".eksempel")?.addEventListener("click", async () => {
+      const id = nyId();
+      const analyse = demoAnalyse();
+      analyse.tittel = "Eksempel: Den keynesianske modellen og finanspolitikk";
+      analyse.sammendrag = analyse.sammendrag.replace("Dette er et eksempel fra demo-modus. ", "");
+      await lagre("leveranser", { id, dato: Date.now(), notat: "Eksempelside – kan slettes", filer: [], analyse });
+      await leggTilBegreper(analyse.begreper, id);
+      melding("Eksempelsiden er lagt til.", "ok");
+      naviger(`/side/${id}`);
+    });
+  }
+
+  // public/js/visninger/lever.js
+  var lever_exports = {};
+  __export(lever_exports, {
+    vis: () => vis2
+  });
+  var MAKS_SIDE = 1800;
+  async function forberedBilde(fil) {
+    const bilde = await createImageBitmap(fil);
+    const skala = Math.min(1, MAKS_SIDE / Math.max(bilde.width, bilde.height));
+    if (skala === 1 && fil.size < 3e6 && ["image/jpeg", "image/png"].includes(fil.type)) return fil;
+    const lerret = document.createElement("canvas");
+    lerret.width = Math.round(bilde.width * skala);
+    lerret.height = Math.round(bilde.height * skala);
+    const ctx = lerret.getContext("2d");
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, lerret.width, lerret.height);
+    ctx.drawImage(bilde, 0, 0, lerret.width, lerret.height);
+    return new Promise((resolve) => lerret.toBlob((b) => resolve(b), "image/jpeg", 0.85));
+  }
+  var MAKS_PDF_SIDER = 20;
+  async function pdfTilBilder(fil) {
+    const pdf = await window.pdfjsLib.getDocument({ data: new Uint8Array(await fil.arrayBuffer()) }).promise;
+    if (pdf.numPages > MAKS_PDF_SIDER) melding(`PDF-en har ${pdf.numPages} sider. Bare de ${MAKS_PDF_SIDER} første tas med.`);
+    const bilder = [];
+    for (let n = 1; n <= Math.min(pdf.numPages, MAKS_PDF_SIDER); n++) {
+      const side = await pdf.getPage(n);
+      const v0 = side.getViewport({ scale: 1 });
+      const viewport = side.getViewport({ scale: Math.min(2.5, MAKS_SIDE / Math.max(v0.width, v0.height)) });
+      const lerret = document.createElement("canvas");
+      lerret.width = Math.round(viewport.width);
+      lerret.height = Math.round(viewport.height);
+      const ctx = lerret.getContext("2d");
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, lerret.width, lerret.height);
+      await side.render({ canvasContext: ctx, viewport }).promise;
+      bilder.push(await new Promise((resolve) => lerret.toBlob(resolve, "image/jpeg", 0.85)));
+    }
+    return bilder;
+  }
+  function tilBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result).split(",")[1]);
+      r.onerror = () => reject(r.error);
+      r.readAsDataURL(blob);
+    });
+  }
+  async function vis2(main2) {
+    let valgte = [];
+    main2.innerHTML = `
+    <h1>Lever sider</h1>
+    <div class="kort">
+      <p>Last opp bilder eller PDF-er av sider fra læreboka eller notatene dine. Du kan levere flere sider samlet, for eksempel et helt delkapittel.</p>
+      <label class="slippsone" tabindex="0">
+        <input type="file" accept="image/*,application/pdf" multiple hidden>
+        <span class="slipp-ikon">📄</span>
+        <strong>Klikk for å velge filer</strong>
+        <span class="dempet">eller dra dem hit (JPG, PNG eller PDF)</span>
+      </label>
+      <div class="forhandsvisning"></div>
+      <label class="felt">Kommentar (valgfritt)
+        <input type="text" class="notat" maxlength="200" placeholder="F.eks. «Kapittel 4.2 – finanspolitikk»">
+      </label>
+      <button class="knapp analyser" type="button" disabled>✨ Analyser med Claude</button>
+      <div class="status"></div>
+    </div>`;
+    const input = main2.querySelector("input[type=file]");
+    const sone = main2.querySelector(".slippsone");
+    const visning = main2.querySelector(".forhandsvisning");
+    const knapp = main2.querySelector(".analyser");
+    const statusBoks = main2.querySelector(".status");
+    function oppdater() {
+      visning.innerHTML = "";
+      valgte.forEach((f, i) => {
+        const el = html(`
+        <div class="miniatyr">
+          ${f.type === "application/pdf" ? '<div class="pdf-ikon">PDF</div>' : `<img src="${f.url}" alt="">`}
+          <span>${esc(f.navn)}</span>
+          <button type="button" class="fjern" title="Fjern">✕</button>
+        </div>`);
+        el.querySelector(".fjern").addEventListener("click", () => {
+          URL.revokeObjectURL(f.url);
+          valgte.splice(i, 1);
+          oppdater();
+        });
+        visning.appendChild(el);
+      });
+      knapp.disabled = valgte.length === 0;
+    }
+    async function leggTil(filer) {
+      for (const fil of filer) {
+        if (fil.type === "application/pdf" && window.pdfjsLib) {
+          try {
+            const sider = await pdfTilBilder(fil);
+            sider.forEach((blob, i) => valgte.push({ navn: `${fil.name} – side ${i + 1}`, type: blob.type, blob, url: URL.createObjectURL(blob) }));
+          } catch {
+            melding(`Klarte ikke å lese PDF-en ${fil.name}.`, "feil");
+          }
+        } else if (fil.type === "application/pdf") {
+          if (fil.size > 25e6) {
+            melding(`${fil.name} er for stor (maks 25 MB).`, "feil");
+            continue;
+          }
+          valgte.push({ navn: fil.name, type: fil.type, blob: fil, url: URL.createObjectURL(fil) });
+        } else if (fil.type.startsWith("image/")) {
+          try {
+            const blob = await forberedBilde(fil);
+            valgte.push({ navn: fil.name, type: blob.type, blob, url: URL.createObjectURL(blob) });
+          } catch {
+            melding(`Klarte ikke å lese bildet ${fil.name}. Prøv JPG eller PNG.`, "feil");
+          }
+        } else {
+          melding(`${fil.name}: Bare bilder og PDF støttes.`, "feil");
+        }
+      }
+      oppdater();
+    }
+    input.addEventListener("change", () => {
+      leggTil([...input.files]);
+      input.value = "";
+    });
+    sone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      sone.classList.add("over");
+    });
+    sone.addEventListener("dragleave", () => sone.classList.remove("over"));
+    sone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      sone.classList.remove("over");
+      leggTil([...e.dataTransfer.files]);
+    });
+    sone.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") input.click();
+    });
+    knapp.addEventListener("click", async () => {
+      knapp.disabled = true;
+      statusBoks.innerHTML = laster("Claude leser sidene … Dette tar vanligvis 20–90 sekunder.");
+      try {
+        const filer = await Promise.all(valgte.map(async (f) => ({ type: f.type, data: await tilBase64(f.blob) })));
+        const notat = main2.querySelector(".notat").value.trim();
+        const { analyse } = await post("/api/analyser", { filer, notat });
+        if (!analyse.lesbar) melding("Claude hadde problemer med å lese sidene. Prøv gjerne et skarpere bilde.", "feil");
+        const id = nyId();
+        await lagre("leveranser", {
+          id,
+          dato: Date.now(),
+          notat,
+          filer: valgte.map((f) => ({ navn: f.navn, type: f.type, blob: f.blob })),
+          analyse
+        });
+        const nye = await leggTilBegreper(analyse.begreper, id);
+        melding(`Ferdig! ${nye} nye begreper lagt til i ordlisten.`, "ok");
+        naviger(`/side/${id}`);
+      } catch (e) {
+        statusBoks.innerHTML = `<p class="feiltekst">${esc(e.message)}</p>`;
+        knapp.disabled = false;
+      }
+    });
+  }
+
+  // public/js/visninger/side.js
+  var side_exports = {};
+  __export(side_exports, {
+    vis: () => vis3
+  });
+
+  // public/js/grafvisning.js
+  var FØR_FARGE = "#9ca3af";
+  function likeKurver(a, b) {
+    if (!a || !b || a.x.length !== b.x.length) return false;
+    for (let i = 0; i < a.x.length; i++) {
+      if (Math.abs((a.x[i] ?? 0) - (b.x[i] ?? 0)) > 1e-9 || Math.abs((a.y[i] ?? 0) - (b.y[i] ?? 0)) > 1e-9) return false;
+    }
+    return true;
+  }
+  function somKart(verdier) {
+    const k = {};
+    for (const v of verdier) k[v.id] = v.verdi;
+    return k;
+  }
+  function visGraf(beholder, graf2, valg = {}) {
+    let mal;
+    try {
+      mal = malFor(graf2);
+    } catch (e) {
+      beholder.appendChild(html(`<div class="graf-kort"><h3>${esc(graf2.tittel || "Graf")}</h3><p class="feiltekst">Kunne ikke tegne grafen: ${esc(e.message)}</p></div>`));
+      return { sjekk: () => null };
+    }
+    const erOppgave = !!valg.oppgave;
+    const { parametre, verdier: start } = startParametre(mal, graf2.startverdier);
+    let nå = { ...start };
+    let vistForklaring = !erOppgave;
+    const kort = html(`
+    <div class="graf-kort">
+      ${graf2.tittel && !erOppgave ? `<h3>${esc(graf2.tittel)}</h3>` : ""}
+      ${graf2.kobling && !erOppgave ? `<p class="dempet">${esc(graf2.kobling)}</p>` : ""}
+      <div class="graf-innhold">
+        <div class="plott"></div>
+        <div class="kontroller">
+          <div class="glidere"></div>
+          <button class="knapp liten lys nullstill" type="button">↺ Nullstill</button>
+        </div>
+      </div>
+      <div class="graf-resultat"></div>
+    </div>`);
+    beholder.appendChild(kort);
+    const plott = kort.querySelector(".plott");
+    const glidere = kort.querySelector(".glidere");
+    const resultat = kort.querySelector(".graf-resultat");
+    const inputs = {};
+    for (const p of parametre) {
+      const rad = html(`
+      <label class="glider">
+        <span class="glider-navn">${esc(p.navn)}</span>
+        <span class="glider-rad">
+          <input type="range" min="${p.min}" max="${p.max}" step="${p.steg}" value="${start[p.id]}">
+          <output>${fmt(start[p.id], 2)}</output>
+        </span>
+      </label>`);
+      const input = rad.querySelector("input");
+      const ut = rad.querySelector("output");
+      input.addEventListener("input", () => {
+        nå[p.id] = Number(input.value);
+        ut.textContent = fmt(nå[p.id], 2);
+        planlegg();
+      });
+      inputs[p.id] = { input, ut };
+      glidere.appendChild(rad);
+    }
+    kort.querySelector(".nullstill").addEventListener("click", () => {
+      nå = { ...start };
+      for (const p of parametre) {
+        inputs[p.id].input.value = start[p.id];
+        inputs[p.id].ut.textContent = fmt(start[p.id], 2);
+      }
+      tegn();
+    });
+    let ventende = false;
+    function planlegg() {
+      if (ventende) return;
+      ventende = true;
+      requestAnimationFrame(() => {
+        ventende = false;
+        tegn();
+      });
+    }
+    function erEndret() {
+      return parametre.some((p) => Math.abs(nå[p.id] - start[p.id]) > 1e-9);
+    }
+    function tegn() {
+      const stil = getComputedStyle(document.body);
+      const tekstFarge = stil.getPropertyValue("--tekst").trim() || "#1f2937";
+      const rutenett = stil.getPropertyValue("--rutenett").trim() || "#eef0f3";
+      const A = mal.beregn(start);
+      const B = mal.beregn(nå);
+      const endret2 = erEndret();
+      const vis9 = !erOppgave || vistForklaring;
+      const område = mal.omrade(start, nå);
+      const spor = [];
+      for (const f of B.flater || []) {
+        spor.push({ x: f.x, y: f.y, fill: "toself", fillcolor: f.farge, mode: "lines", line: { width: 0 }, name: f.navn, hoverinfo: "name", showlegend: true });
+      }
+      if (endret2) {
+        for (const k of A.kurver) {
+          const ny = B.kurver.find((b) => b.id === k.id);
+          if (ny && likeKurver(k, ny)) continue;
+          spor.push({ x: k.x, y: k.y, mode: "lines", name: `${k.navn} (før)`, line: { color: k.farge, width: 2, dash: "dash" }, opacity: 0.45, hoverinfo: "skip" });
+        }
+      }
+      for (const k of B.kurver) {
+        spor.push({
+          x: k.x,
+          y: k.y,
+          mode: "lines",
+          name: k.navn,
+          line: { color: k.farge, width: k.strek ? 2 : 3, dash: k.strek || "solid" },
+          hovertemplate: `${esc(k.navn)}<br>${esc(mal.akser.x)}: %{x:.1f}<br>${esc(mal.akser.y)}: %{y:.1f}<extra></extra>`
+        });
+      }
+      const shapes = [];
+      const annotations = [];
+      const etikett = (x, y, tekst4, farge, ax, ay) => ({
+        x,
+        y,
+        text: tekst4,
+        showarrow: true,
+        arrowhead: 0,
+        arrowcolor: farge,
+        ax,
+        ay,
+        bgcolor: stil.getPropertyValue("--kort").trim() || "white",
+        bordercolor: farge,
+        borderpad: 3,
+        borderwidth: 1,
+        font: { size: 12, color: farge }
+      });
+      if (endret2 && vis9) {
+        const gamle = A.punkter.filter((p) => !p.bi);
+        spor.push({
+          x: gamle.map((p) => p.x),
+          y: gamle.map((p) => p.y),
+          mode: "markers",
+          name: "Før",
+          showlegend: false,
+          marker: { size: 11, color: stil.getPropertyValue("--kort").trim() || "white", line: { color: FØR_FARGE, width: 2.5 } },
+          hovertemplate: `Før<br>%{x:.1f}, %{y:.1f}<extra></extra>`
+        });
+        for (const p of gamle) annotations.push(etikett(p.x, p.y, "Før", FØR_FARGE, -34, 30));
+      }
+      const nye = B.punkter;
+      spor.push({
+        x: nye.map((p) => p.x),
+        y: nye.map((p) => p.y),
+        mode: "markers",
+        name: "Punkter",
+        text: nye.map((p) => p.navn),
+        showlegend: false,
+        marker: { size: nye.map((p) => p.bi ? 9 : 13), color: nye.map((p) => p.bi ? "#7c3aed" : tekstFarge), line: { color: stil.getPropertyValue("--kort").trim() || "white", width: 2 } },
+        hovertemplate: `%{text}<br>${esc(mal.akser.x)}: %{x:.2f}<br>${esc(mal.akser.y)}: %{y:.2f}<extra></extra>`
+      });
+      for (const p of nye) {
+        const tekst4 = endret2 && vis9 && !p.bi && p.navn === "Likevekt" ? "Ny likevekt" : p.navn;
+        annotations.push(etikett(p.x, p.y, tekst4, p.bi ? "#7c3aed" : tekstFarge, 36, -32));
+      }
+      for (const p of nye) {
+        shapes.push({ type: "line", x0: p.x, x1: p.x, y0: område.y[0], y1: p.y, line: { color: "#6b7280", width: 1, dash: "dot" } });
+        shapes.push({ type: "line", x0: område.x[0], x1: p.x, y0: p.y, y1: p.y, line: { color: "#6b7280", width: 1, dash: "dot" } });
+      }
+      const layout = {
+        margin: { l: 60, r: 16, t: 16, b: 56 },
+        xaxis: { title: { text: mal.akser.x }, range: område.x, fixedrange: true, zeroline: true, gridcolor: rutenett },
+        yaxis: { title: { text: mal.akser.y }, range: område.y, fixedrange: true, zeroline: true, gridcolor: rutenett },
+        legend: { orientation: "h", y: -0.3, yanchor: "top", font: { size: 11 } },
+        shapes,
+        annotations,
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(0,0,0,0)",
+        font: { family: "system-ui, -apple-system, Segoe UI, sans-serif", color: tekstFarge, size: 12 },
+        hovermode: "closest"
+      };
+      if (window.Plotly) window.Plotly.react(plott, spor, layout, { displayModeBar: false, responsive: true });
+      else plott.textContent = "Graf-biblioteket ble ikke lastet.";
+      if (!vis9) {
+        resultat.innerHTML = "";
+        return;
+      }
+      const vA = somKart(A.verdier), vB = somKart(B.verdier);
+      const rader = B.verdier.map((v) => {
+        const før = vA[v.id];
+        const d = v.desimaler ?? 1;
+        const diff = typeof før === "number" ? v.verdi - før : null;
+        const pil = diff == null || Math.abs(diff) < 1e-9 ? "" : diff > 0 ? "▲" : "▼";
+        return `<tr><td>${esc(v.navn)}</td>${endret2 ? `<td class="tall">${fmt(før, d)}</td>` : ""}<td class="tall"><strong>${fmt(v.verdi, d)}</strong></td>${endret2 ? `<td class="tall endring">${pil} ${diff == null || Math.abs(diff) < 1e-9 ? "–" : (diff > 0 ? "+" : "") + fmt(diff, d)}</td>` : ""}</tr>`;
+      }).join("");
+      const tabell2 = `<div class="tabell-ramme"><table class="nokkeltall"><thead><tr><th></th>${endret2 ? "<th>Før</th><th>Nå</th><th>Endring</th>" : "<th>Verdi</th>"}</tr></thead><tbody>${rader}</tbody></table></div>`;
+      let tekst3 = "";
+      if (!endret2) {
+        tekst3 = mal.tolk(start, nå, vA, vB).filter(() => ["konjunktursykel", "ad-as", "phillips"].includes(mal.id)).join(" ") || "Flytt en glidebryter for å se hva som skjer med kurvene og likevekten.";
+      } else {
+        const endringer = parametre.filter((p) => Math.abs(nå[p.id] - start[p.id]) > 1e-9).map((p) => `${p.navn.split(" – ")[0]} fra ${fmt(start[p.id], 2)} til ${fmt(nå[p.id], 2)}`);
+        const virkninger = B.verdier.filter((v) => typeof vA[v.id] === "number" && Math.abs(v.verdi - vA[v.id]) > 1e-6).slice(0, 3).map((v) => `${v.navn.replace(/\s*\(.*\)$/, "")} ${v.verdi > vA[v.id] ? "øker" : "faller"} fra ${fmt(vA[v.id], v.desimaler ?? 1)} til ${fmt(v.verdi, v.desimaler ?? 1)}`);
+        tekst3 = `Du endret ${endringer.join(" og ")}. `;
+        if (virkninger.length) tekst3 += `${virkninger.join(". ")}. `;
+        tekst3 += mal.tolk(start, nå, vA, vB).join(" ");
+      }
+      resultat.innerHTML = `${tabell2}<div class="forklaring"><h4>Hva skjer?</h4><p>${esc(tekst3)}</p></div>`;
+      resultat.querySelector(".forklaring h4").appendChild(lesHøytKnapp(() => tekst3));
+    }
+    tegn();
+    return {
+      // For grafoppgaver: finner glidebryteren som er flyttet mest, og sjekker om det er riktig parameter i riktig retning.
+      sjekk() {
+        const { riktigParameter, riktigRetning } = valg.oppgave;
+        let størst = null;
+        for (const p of parametre) {
+          const rel = (nå[p.id] - start[p.id]) / (p.max - p.min || 1);
+          if (Math.abs(rel) > 1e-9 && (!størst || Math.abs(rel) > Math.abs(størst.rel))) størst = { p, rel };
+        }
+        vistForklaring = true;
+        tegn();
+        if (!størst) return { flyttet: false };
+        const retning = størst.rel > 0 ? "opp" : "ned";
+        const riktigP = parametre.find((p) => p.id === riktigParameter);
+        return {
+          flyttet: true,
+          riktig: størst.p.id === riktigParameter && retning === riktigRetning,
+          valgt: `${størst.p.navn} (${retning === "opp" ? "økt" : "redusert"})`,
+          fasit: riktigP ? `${riktigP.navn} (${riktigRetning === "opp" ? "økes" : "reduseres"})` : riktigParameter
+        };
+      }
+    };
+  }
+
+  // public/js/visninger/side.js
+  async function vis3(main2, [id]) {
+    const l = await hent("leveranser", id);
+    if (!l) {
+      main2.innerHTML = '<div class="kort"><p>Fant ikke denne siden.</p><a href="#/oversikt">Tilbake</a></div>';
+      return;
+    }
+    const a = l.analyse;
+    main2.innerHTML = `
+    <a class="tilbake" href="#/oversikt">← Oversikt</a>
+    <h1>${esc(a.tittel)}</h1>
+    <p class="dempet">${dato(l.dato)}${l.notat ? " · " + esc(l.notat) : ""}</p>
+    <div class="chips">${temaChips(a.temaer)}</div>
+
+    <div class="to-kolonner">
+      <section class="kort">
+        <div class="rad-mellom"><h2>Sammendrag</h2><span class="les-sammendrag"></span></div>
+        <p class="sammendrag">${esc(a.sammendrag)}</p>
+        <div class="rad-mellom"><h2>Hovedpoenger</h2><span class="les-poeng"></span></div>
+        <ul class="poeng">${a.hovedpoenger.map((p) => `<li>${esc(p)}</li>`).join("")}</ul>
+      </section>
+      <section class="kort filer">
+        <h2>Filer</h2>
+        <div class="fil-liste"></div>
+      </section>
+    </div>
+
+    ${a.grafer?.length ? '<section class="kort"><h2>Interaktive grafer</h2><p class="dempet">Flytt glidebryterne og se hva som skjer med likevekten.</p><div class="grafer"></div></section>' : ""}
+
+    <section class="kort">
+      <div class="rad-mellom"><h2>Begreper fra denne siden</h2><a class="knapp liten lys" href="#/begreper">Hele ordlisten →</a></div>
+      <dl class="begrepliste">
+        ${a.begreper.map((b) => `<div><dt>${esc(b.begrep)}</dt><dd>${esc(b.forklaring)}${b.eksempel ? `<br><em>Eksempel: ${esc(b.eksempel)}</em>` : ""}</dd></div>`).join("")}
+      </dl>
+    </section>
+
+    <div class="handlinger">
+      <a class="knapp" href="#/oppgaver?kilde=${l.id}">✏️ Lag oppgaver fra denne siden</a>
+      <button class="knapp fare slett" type="button">🗑 Slett siden</button>
+    </div>`;
+    main2.querySelector(".les-sammendrag").appendChild(lesHøytKnapp(() => `${a.tittel}. ${a.sammendrag}`));
+    main2.querySelector(".les-poeng").appendChild(lesHøytKnapp(() => a.hovedpoenger.join(" ")));
+    const filListe = main2.querySelector(".fil-liste");
+    if (!l.filer.some((f) => f.blob)) filListe.innerHTML = '<p class="dempet">Ingen filer lagret.</p>';
+    for (const f of l.filer.filter((x) => x.blob)) {
+      const url = URL.createObjectURL(f.blob);
+      filListe.appendChild(html(f.type === "application/pdf" ? `<a class="fil-pdf" href="${url}" target="_blank" rel="noopener">📄 ${esc(f.navn)}</a>` : `<a href="${url}" target="_blank" rel="noopener" title="Åpne i full størrelse"><img src="${url}" alt="${esc(f.navn)}"></a>`));
+    }
+    const grafBeholder = main2.querySelector(".grafer");
+    for (const g of a.grafer || []) visGraf(grafBeholder, g);
+    main2.querySelector(".slett").addEventListener("click", async () => {
+      if (!await bekreft("Vil du slette denne siden? Begreper som bare kommer fra denne siden, slettes også.", { ja: "Slett", fare: true })) return;
+      await slett("leveranser", l.id);
+      await fjernKildeFraBegreper(l.id);
+      melding("Siden er slettet.");
+      naviger("/oversikt");
+    });
+  }
+
+  // public/js/visninger/grafer.js
+  var grafer_exports = {};
+  __export(grafer_exports, {
+    vis: () => vis4
+  });
+  async function vis4(main2, deler, query) {
+    const leveranser = (await hentAlle("leveranser")).sort((a, b) => b.dato - a.dato);
+    const fraSider = [];
+    for (const l of leveranser) (l.analyse.grafer || []).forEach((g, i) => fraSider.push({ nøkkel: `${l.id}:${i}`, graf: g, side: l }));
+    const valgt = query.vis || Object.keys(MALER)[0];
+    main2.innerHTML = `
+    <h1>Grafer</h1>
+    <div class="graf-oppsett">
+      <aside class="kort grafmeny">
+        <h3>Modeller</h3>
+        <ul>${Object.values(MALER).map((m) => `<li><a class="${valgt === m.id ? "aktiv" : ""}" href="#/grafer?vis=${m.id}">${esc(m.navn)}</a></li>`).join("")}</ul>
+        ${fraSider.length ? `<h3>Fra sidene dine</h3>
+        <ul>${fraSider.map((g) => `<li><a class="${valgt === g.nøkkel ? "aktiv" : ""}" href="#/grafer?vis=${encodeURIComponent(g.nøkkel)}">${esc(g.graf.tittel)}<small>${esc(g.side.analyse.tittel)}</small></a></li>`).join("")}</ul>` : ""}
+      </aside>
+      <section class="kort graf-flate"></section>
+    </div>`;
+    const flate = main2.querySelector(".graf-flate");
+    if (MALER[valgt]) {
+      const m = MALER[valgt];
+      flate.innerHTML = `<p class="dempet">${esc(m.beskrivelse)}</p>`;
+      visGraf(flate, { mal: m.id, tittel: m.navn, startverdier: [] });
+    } else {
+      const g = fraSider.find((x) => x.nøkkel === valgt);
+      if (g) {
+        flate.innerHTML = `<p class="dempet">Fra siden <a href="#/side/${g.side.id}">${esc(g.side.analyse.tittel)}</a></p>`;
+        visGraf(flate, g.graf);
+      } else flate.innerHTML = "<p>Fant ikke grafen.</p>";
+    }
+  }
+
+  // public/js/visninger/oppgaver.js
+  var oppgaver_exports = {};
+  __export(oppgaver_exports, {
+    vis: () => vis5
+  });
+  var TYPE_NAVN = { flervalg: "Flervalg", regning: "Regneoppgave", drofting: "Drøftingsoppgave", graf: "Grafoppgave" };
+  async function vis5(main2, [settId], query) {
+    if (settId) return visSett(main2, settId);
+    return visOversikt(main2, query);
+  }
+  function lagKontekst(leveranser) {
+    return leveranser.map((l, i) => {
+      const a = l.analyse;
+      return `### Side ${i + 1}: ${a.tittel}
+Temaer: ${(a.temaer || []).map(temaNavn).join(", ")}
+Sammendrag: ${a.sammendrag}
+Hovedpoenger:
+${a.hovedpoenger.map((p) => `- ${p}`).join("\n")}
+Begreper:
+${a.begreper.map((b) => `- ${b.begrep}: ${b.forklaring}`).join("\n")}`;
+    }).join("\n\n");
+  }
+  async function visOversikt(main2, query) {
+    const leveranser = (await hentAlle("leveranser")).sort((a, b) => b.dato - a.dato);
+    const sett = (await hentAlle("oppgavesett")).sort((a, b) => b.dato - a.dato);
+    if (!leveranser.length) {
+      main2.innerHTML = `<h1>Oppgaver</h1><div class="kort tom"><p>Du må levere minst én side før du kan lage oppgaver.</p><a class="knapp" href="#/lever">Lever en side</a></div>`;
+      return;
+    }
+    const forhåndsvalgt = query.kilde ? [query.kilde] : leveranser.slice(0, 1).map((l) => l.id);
+    const brukteTemaer = TEMAER.filter((t) => leveranser.some((l) => (l.analyse.temaer || []).includes(t.id)));
+    main2.innerHTML = `
+    <h1>Oppgaver</h1>
+    <section class="kort">
+      <h2>Lag nye oppgaver</h2>
+      <div class="to-kolonner">
+        <div>
+          <h3>1. Hvilke sider?</h3>
+          <label class="felt">Velg alle sider om et tema:
+            <select class="velg-tema"><option value="">– velg tema –</option>${brukteTemaer.map((t) => `<option value="${t.id}">${esc(t.navn)}</option>`).join("")}<option value="*">Alle sider</option></select>
+          </label>
+          <div class="sidevalg">
+            ${leveranser.map((l) => `<label class="avkryss"><input type="checkbox" value="${l.id}" ${forhåndsvalgt.includes(l.id) ? "checked" : ""}> ${esc(l.analyse.tittel)}</label>`).join("")}
+          </div>
+        </div>
+        <div>
+          <h3>2. Hvor mange?</h3>
+          <div class="antall">
+            <label>Flervalg <input type="number" data-type="flervalg" min="0" max="10" value="4"></label>
+            <label>Regneoppgaver <input type="number" data-type="regning" min="0" max="10" value="2"></label>
+            <label>Drøfting <input type="number" data-type="drofting" min="0" max="5" value="1"></label>
+            <label>Grafoppgaver <input type="number" data-type="graf" min="0" max="10" value="2"></label>
+          </div>
+          <label class="felt">Nivå
+            <select class="niva">
+              <option value="lett – grunnleggende forståelse">Lett</option>
+              <option value="middels – vanlig prøvenivå" selected>Middels</option>
+              <option value="eksamensnivå – som eksamen i Samfunnsøkonomi 2">Eksamensnivå</option>
+            </select>
+          </label>
+          <button class="knapp lag" type="button">✨ Lag oppgaver</button>
+        </div>
+      </div>
+      <div class="status"></div>
+    </section>
+
+    <section class="kort">
+      <h2>Tidligere oppgavesett</h2>
+      ${sett.length === 0 ? '<p class="dempet">Ingen ennå.</p>' : `
+      <ul class="leveranseliste">
+        ${sett.map((s) => {
+      const rettet = s.oppgaver.filter((o) => typeof o.resultat?.riktig === "boolean");
+      const riktige = rettet.filter((o) => o.resultat.riktig).length;
+      const besvart = s.oppgaver.filter((o) => o.resultat).length;
+      return `<li><a href="#/oppgaver/${s.id}"><strong>${esc(s.tittel)}</strong>
+            <span class="dempet">${dato(s.dato)} · ${besvart}/${s.oppgaver.length} besvart${rettet.length ? ` · ${riktige}/${rettet.length} riktige` : ""}</span></a></li>`;
+    }).join("")}
+      </ul>`}
+    </section>`;
+    main2.querySelector(".velg-tema").addEventListener("change", (e) => {
+      const t = e.target.value;
+      if (!t) return;
+      main2.querySelectorAll(".sidevalg input").forEach((cb) => {
+        const l = leveranser.find((x) => x.id === cb.value);
+        cb.checked = t === "*" || (l.analyse.temaer || []).includes(t);
+      });
+    });
+    main2.querySelector(".lag").addEventListener("click", async (e) => {
+      const valgte = [...main2.querySelectorAll(".sidevalg input:checked")].map((cb) => leveranser.find((l) => l.id === cb.value));
+      if (!valgte.length) {
+        melding("Velg minst én side.", "feil");
+        return;
+      }
+      const antall = {};
+      main2.querySelectorAll(".antall input").forEach((i) => {
+        antall[i.dataset.type] = Number(i.value) || 0;
+      });
+      const status2 = main2.querySelector(".status");
+      e.target.disabled = true;
+      status2.innerHTML = laster("Claude lager oppgaver … Dette tar vanligvis 30–90 sekunder.");
+      try {
+        const svar = await post("/api/oppgaver", { kontekst: lagKontekst(valgte), antall, nivå: main2.querySelector(".niva").value });
+        const id = nyId();
+        await lagre("oppgavesett", {
+          id,
+          dato: Date.now(),
+          tittel: valgte.length === 1 ? valgte[0].analyse.tittel : `${valgte.length} sider: ${valgte.map((v) => v.analyse.tittel).join(", ").slice(0, 80)}`,
+          kilder: valgte.map((v) => v.id),
+          oppgaver: svar.oppgaver.map((o) => ({ ...o, id: nyId(), resultat: null }))
+        });
+        naviger(`/oppgaver/${id}`);
+      } catch (err) {
+        status2.innerHTML = `<p class="feiltekst">${esc(err.message)}</p>`;
+        e.target.disabled = false;
+      }
+    });
+  }
+  function tolkTall(tekst3) {
+    const renset = String(tekst3).replace(/\s/g, "").replace(/[^\d,.\-−]/g, "").replace("−", "-").replace(",", ".");
+    const n = parseFloat(renset);
+    return isFinite(n) ? n : null;
+  }
+  async function visSett(main2, settId) {
+    const sett = await hent("oppgavesett", settId);
+    if (!sett) {
+      main2.innerHTML = '<div class="kort"><p>Fant ikke oppgavesettet.</p></div>';
+      return;
+    }
+    main2.innerHTML = `
+    <a class="tilbake" href="#/oppgaver">← Alle oppgaver</a>
+    <h1>${esc(sett.tittel)}</h1>
+    <p class="poengsum"></p>
+    <div class="oppgaveliste"></div>
+    <div class="handlinger"><button class="knapp fare slett" type="button">🗑 Slett oppgavesettet</button></div>`;
+    const liste2 = main2.querySelector(".oppgaveliste");
+    const lagreSett = () => lagre("oppgavesett", sett);
+    function oppdaterPoeng() {
+      const rettet = sett.oppgaver.filter((o) => typeof o.resultat?.riktig === "boolean");
+      const riktige = rettet.filter((o) => o.resultat.riktig).length;
+      main2.querySelector(".poengsum").textContent = `${sett.oppgaver.filter((o) => o.resultat).length} av ${sett.oppgaver.length} besvart` + (rettet.length ? ` · ${riktige} av ${rettet.length} automatisk rettede er riktige` : "");
+    }
+    sett.oppgaver.forEach((o, i) => {
+      const kort = html(`
+      <section class="kort oppgave">
+        <div class="rad-mellom">
+          <span class="merke">${i + 1}. ${TYPE_NAVN[o.type]} · ${esc(temaNavn(o.tema))}</span>
+          <span class="les"></span>
+        </div>
+        <p class="sporsmal">${esc(o.sporsmal)}</p>
+        <div class="svarflate"></div>
+        <div class="tilbakemelding"></div>
+      </section>`);
+      kort.querySelector(".les").appendChild(lesHøytKnapp(() => o.sporsmal + (o.type === "flervalg" ? " Alternativene er: " + o.alternativer.join(". ") : "")));
+      liste2.appendChild(kort);
+      tegnOppgave(o, kort);
+    });
+    oppdaterPoeng();
+    function visLøsning(o, boks, ekstra = "") {
+      boks.innerHTML = `${ekstra}<details class="losning" ${o.resultat?.riktig === false ? "open" : ""}><summary>Løsningsforslag og forklaring</summary><p>${esc(o.losningsforslag)}</p></details>
+      <button class="knapp liten lys igjen" type="button">↺ Prøv igjen</button>`;
+      boks.querySelector("summary").appendChild(lesHøytKnapp(() => o.losningsforslag));
+      boks.querySelector(".igjen").addEventListener("click", async () => {
+        o.resultat = null;
+        await lagreSett();
+        const kort = boks.closest(".oppgave");
+        kort.querySelector(".svarflate").innerHTML = "";
+        boks.innerHTML = "";
+        tegnOppgave(o, kort);
+        oppdaterPoeng();
+      });
+    }
+    function dom(riktig, tekst3) {
+      return `<p class="dom ${riktig ? "riktig" : "feil"}">${riktig ? "✅ Riktig!" : "❌ Ikke riktig."} ${esc(tekst3 || "")}</p>`;
+    }
+    function tegnOppgave(o, kort) {
+      const flate = kort.querySelector(".svarflate");
+      const tilbake = kort.querySelector(".tilbakemelding");
+      const r = o.resultat;
+      if (o.type === "flervalg") {
+        flate.innerHTML = `<div class="alternativer">${o.alternativer.map((a, j) => `
+        <label class="alternativ ${r ? j === o.riktigAlternativ ? "er-riktig" : j === r.svar ? "er-feil" : "" : ""}">
+          <input type="radio" name="alt-${o.id}" value="${j}" ${r ? "disabled" : ""} ${r?.svar === j ? "checked" : ""}> ${esc(a)}
+        </label>`).join("")}</div>
+        ${r ? "" : '<button class="knapp sjekk" type="button">Sjekk svar</button>'}`;
+        if (r) visLøsning(o, tilbake, dom(r.riktig, r.riktig ? "" : `Riktig svar er: ${o.alternativer[o.riktigAlternativ]}`));
+        flate.querySelector(".sjekk")?.addEventListener("click", async () => {
+          const valgt = flate.querySelector("input:checked");
+          if (!valgt) {
+            melding("Velg et alternativ først.");
+            return;
+          }
+          const svar = Number(valgt.value);
+          o.resultat = { svar, riktig: svar === o.riktigAlternativ, tid: Date.now() };
+          await lagreSett();
+          tegnOppgave(o, kort);
+          oppdaterPoeng();
+        });
+      }
+      if (o.type === "regning") {
+        flate.innerHTML = `<div class="regnesvar">
+          <input type="text" inputmode="decimal" placeholder="Ditt svar" value="${r ? esc(r.svar) : ""}" ${r ? "disabled" : ""}>
+          <span>${esc(o.enhet || "")}</span>
+          ${r ? "" : '<button class="knapp sjekk" type="button">Sjekk svar</button>'}
+        </div>`;
+        if (r) visLøsning(o, tilbake, dom(r.riktig, `Fasit: ${fmt(o.fasitTall, 4)} ${o.enhet || ""}`));
+        const felt = flate.querySelector("input");
+        const sjekk = async () => {
+          const tall3 = tolkTall(felt.value);
+          if (tall3 === null) {
+            melding("Skriv et tall (bruk komma eller punktum som desimaltegn).");
+            return;
+          }
+          const tol = o.toleranse > 0 ? o.toleranse : Math.max(Math.abs(o.fasitTall) * 0.01, 0.01);
+          o.resultat = { svar: felt.value, riktig: Math.abs(tall3 - o.fasitTall) <= tol + 1e-9, tid: Date.now() };
+          await lagreSett();
+          tegnOppgave(o, kort);
+          oppdaterPoeng();
+        };
+        flate.querySelector(".sjekk")?.addEventListener("click", sjekk);
+        felt.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && !r) sjekk();
+        });
+      }
+      if (o.type === "drofting") {
+        flate.innerHTML = `
+        ${o.vurderingskriterier?.length ? `<details class="kriterier"><summary>Hva vektlegges? (vurderingskriterier)</summary><ul>${o.vurderingskriterier.map((k) => `<li>${esc(k)}</li>`).join("")}</ul></details>` : ""}
+        <textarea rows="10" placeholder="Skriv svaret ditt her …" ${r ? "disabled" : ""}>${r ? esc(r.svar) : ""}</textarea>
+        <div class="rad-mellom"><span class="dempet ordtelling"></span>${r ? "" : '<button class="knapp sjekk" type="button">✨ Få vurdering fra Claude</button>'}</div>`;
+        const felt = flate.querySelector("textarea");
+        const telling = flate.querySelector(".ordtelling");
+        const tell = () => {
+          telling.textContent = `${felt.value.trim().split(/\s+/).filter(Boolean).length} ord`;
+        };
+        felt.addEventListener("input", () => {
+          tell();
+          try {
+            localStorage.setItem(`utkast-${o.id}`, felt.value);
+          } catch {
+          }
+        });
+        if (!r) {
+          try {
+            felt.value = localStorage.getItem(`utkast-${o.id}`) || "";
+          } catch {
+          }
+        }
+        tell();
+        if (r) {
+          const v = r.vurdering;
+          const tekst3 = `${v.tilbakemelding}`;
+          visLøsning(o, tilbake, `
+          <div class="vurdering">
+            <div class="rad-mellom"><h4>Tilbakemelding</h4><span class="karakter" title="Omtrentlig karakter">Karakter ca. ${v.karakter}</span></div>
+            <p>${esc(v.tilbakemelding)}</p>
+            ${v.styrker.length ? `<h5>👍 Bra</h5><ul>${v.styrker.map((s) => `<li>${esc(s)}</li>`).join("")}</ul>` : ""}
+            ${v.forbedringer.length ? `<h5>💡 Slik kan du forbedre svaret</h5><ul>${v.forbedringer.map((s) => `<li>${esc(s)}</li>`).join("")}</ul>` : ""}
+            <details><summary>Eksempel på et godt svar</summary><p class="modellsvar">${esc(v.modellsvar)}</p></details>
+          </div>`);
+          tilbake.querySelector(".vurdering h4").appendChild(lesHøytKnapp(() => tekst3 + " " + v.forbedringer.join(" ")));
+        }
+        flate.querySelector(".sjekk")?.addEventListener("click", async (e) => {
+          if (felt.value.trim().split(/\s+/).length < 15) {
+            melding("Skriv litt mer før du ber om vurdering.");
+            return;
+          }
+          e.target.disabled = true;
+          tilbake.innerHTML = laster("Claude leser svaret ditt …");
+          try {
+            const vurdering = await post("/api/vurder", { sporsmal: o.sporsmal, vurderingskriterier: o.vurderingskriterier, losningsforslag: o.losningsforslag, svar: felt.value });
+            o.resultat = { svar: felt.value, riktig: null, karakter: vurdering.karakter, vurdering, tid: Date.now() };
+            await lagreSett();
+            try {
+              localStorage.removeItem(`utkast-${o.id}`);
+            } catch {
+            }
+            tegnOppgave(o, kort);
+            oppdaterPoeng();
+          } catch (err) {
+            tilbake.innerHTML = `<p class="feiltekst">${esc(err.message)}</p>`;
+            e.target.disabled = false;
+          }
+        });
+      }
+      if (o.type === "graf") {
+        if (!o.graf) {
+          flate.innerHTML = '<p class="feiltekst">Oppgaven mangler graf.</p>';
+          return;
+        }
+        flate.innerHTML = '<p class="dempet">Flytt den glidebryteren du mener er riktig, i riktig retning. Trykk deretter «Sjekk svar».</p>';
+        const grafBoks = html("<div></div>");
+        flate.appendChild(grafBoks);
+        const g = visGraf(grafBoks, { mal: o.graf.mal, startverdier: o.graf.startverdier }, { oppgave: o.graf });
+        const knapp = html('<button class="knapp sjekk" type="button">Sjekk svar</button>');
+        flate.appendChild(knapp);
+        if (r) {
+          visLøsning(o, tilbake, dom(r.riktig, r.riktig ? "" : `Du flyttet: ${r.valgt}. Riktig: ${r.fasit}.`));
+          knapp.remove();
+        }
+        knapp.addEventListener("click", async () => {
+          const res = g.sjekk();
+          if (!res.flyttet) {
+            melding("Du har ikke flyttet noen glidebryter ennå.");
+            return;
+          }
+          o.resultat = { riktig: res.riktig, valgt: res.valgt, fasit: res.fasit, tid: Date.now() };
+          await lagreSett();
+          knapp.remove();
+          visLøsning(o, tilbake, dom(res.riktig, res.riktig ? "" : `Du flyttet: ${res.valgt}. Riktig: ${res.fasit}.`));
+          oppdaterPoeng();
+        });
+      }
+    }
+    main2.querySelector(".slett").addEventListener("click", async () => {
+      if (!await bekreft("Slette dette oppgavesettet og svarene dine?", { ja: "Slett", fare: true })) return;
+      await slett("oppgavesett", sett.id);
+      naviger("/oppgaver");
+    });
+  }
+
+  // public/js/visninger/begreper.js
+  var begreper_exports = {};
+  __export(begreper_exports, {
+    vis: () => vis6
+  });
+  async function vis6(main2) {
+    const leveranser = await hentAlle("leveranser");
+    const sideNavn = Object.fromEntries(leveranser.map((l) => [l.id, l.analyse.tittel]));
+    let begreper = await hentAlle("begreper");
+    main2.innerHTML = `
+    <div class="rad-mellom"><h1>Begreper</h1><a class="knapp" href="#/flashkort">🃏 Øv med flashkort</a></div>
+    <div class="kort filterlinje">
+      <input type="search" class="sok" placeholder="Søk etter begrep …">
+      <select class="tema"><option value="">Alle temaer</option>${TEMAER.map((t) => `<option value="${t.id}">${esc(t.navn)}</option>`).join("")}</select>
+      <button class="knapp lys liten ny" type="button">+ Legg til eget begrep</button>
+    </div>
+    <p class="dempet antall"></p>
+    <div class="ordliste"></div>`;
+    const liste2 = main2.querySelector(".ordliste");
+    const søk = main2.querySelector(".sok");
+    const tema2 = main2.querySelector(".tema");
+    function tegn() {
+      const q = søk.value.trim().toLowerCase();
+      const t = tema2.value;
+      const utvalg = begreper.filter((b) => !t || b.temaer.includes(t)).filter((b) => !q || b.begrep.toLowerCase().includes(q) || (b.forklaring || "").toLowerCase().includes(q)).sort((a, b) => a.begrep.localeCompare(b.begrep, "nb"));
+      main2.querySelector(".antall").textContent = `${utvalg.length} av ${begreper.length} begreper`;
+      liste2.innerHTML = utvalg.length ? "" : '<div class="kort tom"><p>Ingen begreper ennå. De kommer automatisk når du leverer sider.</p></div>';
+      let forrigeBokstav = "";
+      for (const b of utvalg) {
+        const bokstav = b.begrep[0].toUpperCase();
+        if (bokstav !== forrigeBokstav) {
+          liste2.appendChild(html(`<h3 class="bokstav">${esc(bokstav)}</h3>`));
+          forrigeBokstav = bokstav;
+        }
+        const kort = html(`
+        <article class="kort begrep">
+          <div class="rad-mellom"><h3>${esc(b.begrep)}</h3><span class="verktoy"></span></div>
+          <p>${esc(b.forklaring)}</p>
+          ${b.eksempel ? `<p class="eksempel"><strong>Eksempel:</strong> ${esc(b.eksempel)}</p>` : ""}
+          <div class="dempet liten-tekst">
+            ${b.temaer.map((x) => esc(temaNavn(x))).join(" · ")}
+            ${b.kilder.length ? " · Fra: " + b.kilder.map((k) => `<a href="#/side/${k}">${esc(sideNavn[k] || "side")}</a>`).join(", ") : ""}
+            · Flashkort-boks ${b.boks}/5
+          </div>
+        </article>`);
+        const verktøy = kort.querySelector(".verktoy");
+        verktøy.appendChild(lesHøytKnapp(() => `${b.begrep}. ${b.forklaring} ${b.eksempel ? "Eksempel: " + b.eksempel : ""}`, ""));
+        const slettKnapp = html('<button class="knapp liten lys" type="button" title="Slett begrepet">🗑</button>');
+        slettKnapp.addEventListener("click", async () => {
+          if (!await bekreft(`Slette «${b.begrep}» fra ordlisten?`, { ja: "Slett", fare: true })) return;
+          await slett("begreper", b.nokkel);
+          begreper = begreper.filter((x) => x.nokkel !== b.nokkel);
+          tegn();
+        });
+        verktøy.appendChild(slettKnapp);
+        liste2.appendChild(kort);
+      }
+    }
+    søk.addEventListener("input", tegn);
+    tema2.addEventListener("change", tegn);
+    main2.querySelector(".ny").addEventListener("click", async () => {
+      const svar = await skjemaDialog("Legg til eget begrep", [
+        { id: "navn", navn: "Begrep" },
+        { id: "forklaring", navn: "Forklaring", flerlinje: true },
+        { id: "eksempel", navn: "Eksempel (valgfritt)", flerlinje: true }
+      ]);
+      if (!svar?.navn) return;
+      const { navn, forklaring, eksempel } = svar;
+      const nokkel = begrepNøkkel(navn);
+      if (await hent("begreper", nokkel)) {
+        melding("Begrepet finnes allerede.");
+        return;
+      }
+      const nytt = { nokkel, begrep: navn.trim(), forklaring, eksempel, temaer: tema2.value ? [tema2.value] : [], kilder: [], boks: 1, sistØvd: null, lagt: Date.now(), egendefinert: true };
+      await lagre("begreper", nytt);
+      begreper.push(nytt);
+      tegn();
+    });
+    tegn();
+  }
+
+  // public/js/visninger/flashkort.js
+  var flashkort_exports = {};
+  __export(flashkort_exports, {
+    vis: () => vis7
+  });
+  var ØKT_STØRRELSE = 15;
+  function lagØkt(begreper) {
+    const pott = begreper.map((b) => ({ b, vekt: Math.pow(2, 5 - b.boks) * (0.5 + Math.random()) }));
+    pott.sort((a, b) => b.vekt - a.vekt);
+    return pott.slice(0, ØKT_STØRRELSE).map((x) => x.b).sort(() => Math.random() - 0.5);
+  }
+  async function vis7(main2, deler, query) {
+    const alle = await hentAlle("begreper");
+    const temaFilter = query.tema || "";
+    const utvalg = temaFilter ? alle.filter((b) => b.temaer.includes(temaFilter)) : alle;
+    main2.innerHTML = `
+    <div class="rad-mellom">
+      <h1>Flashkort</h1>
+      <select class="tema"><option value="">Alle temaer</option>${TEMAER.map((t) => `<option value="${t.id}" ${t.id === temaFilter ? "selected" : ""}>${esc(t.navn)}</option>`).join("")}</select>
+    </div>
+    <div class="bokser">${[1, 2, 3, 4, 5].map((n) => `<div><strong>${utvalg.filter((b) => b.boks === n).length}</strong><span>Boks ${n}</span></div>`).join("")}</div>
+    <div class="flashflate"></div>`;
+    main2.querySelector(".tema").addEventListener("change", (e) => {
+      naviger(`/flashkort${e.target.value ? "?tema=" + e.target.value : ""}`);
+    });
+    const flate = main2.querySelector(".flashflate");
+    if (!utvalg.length) {
+      flate.innerHTML = '<div class="kort tom"><p>Ingen begreper å øve på ennå. Lever en side først!</p><a class="knapp" href="#/lever">Lever side</a></div>';
+      return;
+    }
+    const økt = lagØkt(utvalg);
+    let i = 0, kunne = 0;
+    function visKort() {
+      if (i >= økt.length) {
+        flate.innerHTML = `<div class="kort tom"><h2>Ferdig! 🎉</h2><p>Du kunne ${kunne} av ${økt.length} kort.</p><button class="knapp igjen" type="button">Ny runde</button></div>`;
+        flate.querySelector(".igjen").addEventListener("click", () => vis7(main2, deler, query));
+        return;
+      }
+      const b = økt[i];
+      flate.innerHTML = `
+      <p class="dempet midt">Kort ${i + 1} av ${økt.length}</p>
+      <div class="flashkort" tabindex="0" title="Klikk for å snu">
+        <div class="forside"><h2>${esc(b.begrep)}</h2><p class="dempet">Hva betyr dette? Tenk deg om, og klikk for å snu kortet.</p></div>
+        <div class="bakside" hidden><h3>${esc(b.begrep)}</h3><p>${esc(b.forklaring)}</p>${b.eksempel ? `<p class="eksempel"><strong>Eksempel:</strong> ${esc(b.eksempel)}</p>` : ""}<span class="les"></span></div>
+      </div>
+      <div class="flash-knapper" hidden>
+        <button class="knapp fare ov" type="button">😕 Øv mer</button>
+        <button class="knapp ok kunne" type="button">😊 Kunne det</button>
+      </div>`;
+      const kort = flate.querySelector(".flashkort");
+      const snu = () => {
+        kort.querySelector(".forside").hidden = true;
+        kort.querySelector(".bakside").hidden = false;
+        flate.querySelector(".flash-knapper").hidden = false;
+      };
+      kort.addEventListener("click", snu);
+      kort.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          snu();
+        }
+      });
+      kort.querySelector(".les").appendChild(lesHøytKnapp(() => `${b.begrep}. ${b.forklaring}`));
+      kort.querySelector(".les").addEventListener("click", (e) => e.stopPropagation());
+      const svar = async (kunneDet) => {
+        b.boks = kunneDet ? Math.min(5, b.boks + 1) : 1;
+        b.sistØvd = Date.now();
+        if (kunneDet) kunne++;
+        await lagre("begreper", b);
+        i++;
+        visKort();
+      };
+      flate.querySelector(".kunne").addEventListener("click", () => svar(true));
+      flate.querySelector(".ov").addEventListener("click", () => svar(false));
+      kort.focus();
+    }
+    visKort();
+  }
+
+  // public/js/visninger/innstillinger.js
+  var innstillinger_exports = {};
+  __export(innstillinger_exports, {
+    vis: () => vis8
+  });
+  async function vis8(main2) {
+    const s = await status();
+    main2.innerHTML = `
+    <h1>Innstillinger</h1>
+
+    <section class="kort">
+      <h2>Høytlesning</h2>
+      <p class="dempet">Talemotor: ${esc(tale.navn)}. Microsoft Edge har ofte de mest naturlige norske stemmene (f.eks. «Pernille» eller «Finn»).</p>
+      <label class="felt">Stemme <select class="stemme"></select></label>
+      <button class="knapp lys test" type="button">🔊 Test stemmen</button>
+    </section>
+
+    ${s.artifact ? `
+    <section class="kort">
+      <h2>Lagring</h2>
+      <p>${s.lagring === "claude" ? "Sidene, begrepene og oppgavene dine lagres privat på claude.ai-kontoen din. Bare du kan se dem, og de følger deg på alle enheter der du er logget inn." : "Dataene lagres bare i denne nettleseren, fordi sidens database ikke var tilgjengelig. De kan forsvinne hvis du tømmer nettleserdata."}</p>
+    </section>` : `
+    <section class="kort">
+      <h2>Backup</h2>
+      <p>Alt du har levert og øvd på, lagres i denne nettleseren på denne PC-en. Ta backup jevnlig, særlig før du tømmer nettleserdata eller bytter PC eller nettleser.</p>
+      <div class="handlinger">
+        <button class="knapp eksporter" type="button">⬇ Last ned backup</button>
+        <label class="knapp lys">⬆ Gjenopprett fra backup<input type="file" accept=".json,application/json" hidden class="importer"></label>
+      </div>
+    </section>`}
+
+    <section class="kort">
+      <h2>Om appen</h2>
+      <p>${s.artifact ? "Appen bruker Claude via innloggingen din på claude.ai. Bruken teller mot Claude-abonnementet ditt." : s.frakoblet ? "Får ikke kontakt med serveren." : s.demo ? "Kjører i <strong>demo-modus</strong> (ingen API-nøkkel)." : `Bruker Claude-modellen <code>${esc(s.modell)}</code>. Du kan endre modellen i filen <code>.env</code>.`}</p>
+    </section>
+
+    <section class="kort">
+      <h2>Slett alt</h2>
+      <p class="dempet">Sletter alle sider, begreper og oppgaver fra denne nettleseren. Dette kan ikke angres.</p>
+      <button class="knapp fare slett" type="button">Slett alle data</button>
+    </section>`;
+    const velg = main2.querySelector(".stemme");
+    function fyllStemmer() {
+      const stemmer = tale.støttes() ? tale.stemmer() : [];
+      const valgt = tale.velgStemme?.();
+      velg.innerHTML = stemmer.length ? stemmer.map((v) => `<option value="${esc(v.name)}" ${valgt?.name === v.name ? "selected" : ""}>${esc(v.name)} (${esc(v.lang)})</option>`).join("") : "<option>Fant ingen norske stemmer – standardstemmen brukes</option>";
+    }
+    fyllStemmer();
+    if (tale.støttes()) speechSynthesis.addEventListener("voiceschanged", fyllStemmer);
+    velg.addEventListener("change", () => {
+      tale.settStemme(velg.value);
+      try {
+        localStorage.setItem("tale", JSON.stringify({ hastighet: tale.hastighet, stemme: velg.value }));
+      } catch {
+      }
+    });
+    main2.querySelector(".test").addEventListener("click", () => tale.les("Hei! Når samlet etterspørsel øker, øker produksjonen, og arbeidsledigheten går ned."));
+    main2.querySelector(".eksporter")?.addEventListener("click", async () => {
+      const data = await eksporter();
+      const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `samok2-backup-${(/* @__PURE__ */ new Date()).toISOString().slice(0, 10)}.json`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5e3);
+      melding("Backup lastet ned.", "ok");
+    });
+    main2.querySelector(".importer")?.addEventListener("change", async (e) => {
+      const fil = e.target.files[0];
+      if (!fil) return;
+      if (!await bekreft("Gjenoppretting erstatter alt som ligger i appen nå. Fortsette?", { ja: "Gjenopprett" })) return;
+      try {
+        await importer(JSON.parse(await fil.text()));
+        melding("Backup gjenopprettet!", "ok");
+        naviger("/oversikt");
+      } catch (err) {
+        melding(`Kunne ikke gjenopprette: ${err.message}`, "feil");
+      }
+    });
+    main2.querySelector(".slett").addEventListener("click", async () => {
+      if (!await bekreft("Er du helt sikker på at du vil slette alle sider, begreper og oppgaver?", { ja: "Slett alt", fare: true })) return;
+      await slettAlt();
+      melding("Alle data er slettet.");
+      naviger("/oversikt");
+    });
+  }
+
+  // artifact/main.js
+  var RUTER = { oversikt: oversikt_exports, lever: lever_exports, side: side_exports, grafer: grafer_exports, oppgaver: oppgaver_exports, begreper: begreper_exports, flashkort: flashkort_exports, innstillinger: innstillinger_exports };
+  var claude = window.claude;
+  var bruk = (navn) => claude?.use ? claude.use(navn).catch(() => null) : Promise.resolve(null);
+  var main = document.getElementById("innhold");
+  var nåværende = "/oversikt";
+  async function visRute(sti) {
+    nåværende = sti;
+    const [rute, spørring = ""] = sti.replace(/^\/?/, "").split("?");
+    const [navn = "oversikt", ...deler] = rute.split("/").filter(Boolean);
+    const visning = RUTER[navn] || oversikt_exports;
+    const query = Object.fromEntries(new URLSearchParams(spørring));
+    document.querySelectorAll(".meny a").forEach((a) => a.classList.toggle("aktiv", a.dataset.rute === (RUTER[navn] ? navn : "oversikt")));
+    tale.stopp();
+    main.innerHTML = "";
+    window.scrollTo(0, 0);
+    try {
+      await visning.vis(main, deler.map(decodeURIComponent), query);
+    } catch (e) {
+      console.error(e);
+      main.innerHTML = `<div class="kort"><h2>Noe gikk galt</h2><p class="feiltekst">${esc(e?.message || String(e))}</p></div>`;
+    }
+  }
+  settNavigator((sti) => visRute(sti));
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest?.('a[href^="#/"]');
+    if (!a) return;
+    e.preventDefault();
+    visRute(a.getAttribute("href").slice(1));
+  });
+  var NØKKEL = { leveranser: "id", begreper: "nokkel", oppgavesett: "id", innstillinger: "id" };
+  var MAKS_BILDE_TEGN = 19e4;
+  function trygId(verdi) {
+    const s = String(verdi);
+    if (/^[A-Za-z0-9_-]{1,150}$/.test(s)) return s;
+    let hex = "";
+    for (const byte of new TextEncoder().encode(s)) hex += byte.toString(16).padStart(2, "0");
+    if (hex.length <= 180) return "x" + hex;
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+    return "x" + hex.slice(0, 160) + "-" + (h >>> 0).toString(36);
+  }
+  function klon(o) {
+    return JSON.parse(JSON.stringify(o));
+  }
+  function lastBilde(blob) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve(img);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("Kunne ikke lese bildet"));
+      };
+      img.src = url;
+    });
+  }
+  async function bildeTilDataUrl(blob) {
+    const img = await lastBilde(blob);
+    for (const [maks, kvalitet] of [[1600, 0.8], [1400, 0.7], [1200, 0.6], [1e3, 0.55], [800, 0.5], [600, 0.5]]) {
+      const skala = Math.min(1, maks / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.naturalWidth * skala);
+      c.height = Math.round(img.naturalHeight * skala);
+      const ctx = c.getContext("2d");
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      const url = c.toDataURL("image/jpeg", kvalitet);
+      if (url.length <= MAKS_BILDE_TEGN) return url;
+    }
+    return null;
+  }
+  function dataUrlTilBlob2(dataUrl) {
+    const [hode, data] = dataUrl.split(",");
+    const type = hode.match(/data:([^;]+)/)?.[1] || "image/jpeg";
+    const bin = atob(data);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type });
+  }
+  function lagClaudeLagring(db, brukerId) {
+    const rot = db.doc(`data/users/${brukerId}/fag`);
+    const samling = (navn) => rot.collection(navn);
+    const filSamling = () => rot.collection("filer");
+    return {
+      async hentAlle(navn) {
+        const snap = await samling(navn).get();
+        return snap.docs.map((d) => klon(d.data()));
+      },
+      async hent(navn, id) {
+        const snap = await samling(navn).doc(trygId(id)).get();
+        if (!snap.exists) return void 0;
+        const obj = klon(snap.data());
+        if (navn === "leveranser") {
+          obj.filer = await Promise.all((obj.filer || []).map(async (f) => {
+            if (!f.filId) return f;
+            const fs = await filSamling().doc(f.filId).get().catch(() => null);
+            return fs?.exists ? { ...f, blob: dataUrlTilBlob2(fs.data().data) } : f;
+          }));
+        }
+        return obj;
+      },
+      async lagre(navn, objekt2) {
+        const kopi = { ...objekt2 };
+        if (navn === "leveranser") {
+          kopi.filer = [];
+          for (const f of objekt2.filer || []) {
+            if (f.filId || !f.blob) {
+              const { blob, ...rest } = f;
+              kopi.filer.push(rest);
+              continue;
+            }
+            let dataUrl = null;
+            try {
+              dataUrl = f.type.startsWith("image/") ? await bildeTilDataUrl(f.blob) : null;
+            } catch {
+            }
+            if (!dataUrl) {
+              kopi.filer.push({ navn: f.navn, type: f.type, mangler: true });
+              continue;
+            }
+            const filId = `${kopi.id}-${kopi.filer.length}`;
+            await filSamling().doc(filId).set({ data: dataUrl });
+            kopi.filer.push({ navn: f.navn, type: "image/jpeg", filId });
+          }
+        }
+        await samling(navn).doc(trygId(kopi[NØKKEL[navn]])).set(klon(kopi));
+      },
+      async slett(navn, id) {
+        const ref = samling(navn).doc(trygId(id));
+        if (navn === "leveranser") {
+          const snap = await ref.get();
+          for (const f of snap.exists ? snap.data().filer || [] : []) {
+            if (f.filId) await filSamling().doc(f.filId).delete();
+          }
+        }
+        await ref.delete();
+      },
+      async tøm(navn) {
+        const snap = await samling(navn).get();
+        for (const d of snap.docs) await samling(navn).doc(d.id).delete();
+        if (navn === "leveranser") {
+          const filer = await filSamling().get();
+          for (const d of filer.docs) await filSamling().doc(d.id).delete();
+        }
+      }
+    };
+  }
+  var lagringsType = "nettleser";
+  async function settOppLagring() {
+    const [db, user] = await Promise.all([bruk("db"), bruk("user")]);
+    const id = await user?.id?.().catch(() => null);
+    if (!db || !id) return;
+    const lagring2 = lagClaudeLagring(db, id);
+    try {
+      await lagring2.hentAlle("innstillinger");
+      settLagring(lagring2);
+      lagringsType = "claude";
+    } catch (e) {
+      console.warn("Databasen svarte ikke, bruker nettleserlagring", e);
+    }
+  }
+  var FEILTEKST = {
+    not_granted: "Siden fikk ikke lov til å bruke Claude. Tillat det i spørsmålet som dukker opp, eller under sidens tillatelser, og prøv igjen.",
+    sampling_disabled: "Claude er ikke tilgjengelig for kontoen din her.",
+    rate_limited: "Du har brukt Claude mye den siste tiden. Vent litt og prøv igjen.",
+    session_expired: "Du er logget ut av claude.ai. Logg inn igjen og prøv på nytt.",
+    image_rejected: "Et av bildene kunne ikke brukes. Prøv et annet bilde (JPG eller PNG).",
+    images_unavailable: "Bilder kan ikke sendes til Claude fra denne visningen. Prøv å åpne siden i nettleseren på claude.ai.",
+    prompt_too_large: "Det ble for mye tekst på én gang. Velg færre sider.",
+    refused: "Claude ville ikke svare på denne forespørselen.",
+    invalid_json: "Claude svarte i et format appen ikke forstod. Prøv igjen.",
+    empty_completion: "Claude ga et tomt svar. Prøv igjen.",
+    cancelled: "Avbrutt."
+  };
+  function jsonInstruks(skjema) {
+    return `
+
+SVARFORMAT: Svar KUN med ett JSON-objekt, uten annen tekst og uten kodeblokk. Objektet skal følge dette JSON-skjemaet nøyaktig (alle felt må være med):
+${JSON.stringify(skjema)}`;
+  }
+  async function spørClaude(prompt, valg = {}) {
+    const sample = await bruk("sample");
+    if (!sample) throw new Error("Claude er ikke tilgjengelig her. Åpne siden på claude.ai mens du er logget inn.");
+    try {
+      return await sample.json(prompt, { modelTier: "default", ...valg });
+    } catch (e) {
+      throw new Error(FEILTEKST[e?.code] || `Noe gikk galt hos Claude (${e?.code || "ukjent feil"}). Prøv igjen.`);
+    }
+  }
+  var liste = (v) => Array.isArray(v) ? v : [];
+  var tekst2 = (v) => typeof v === "string" ? v : v == null ? "" : String(v);
+  var tall2 = (v, standard = 0) => Number.isFinite(Number(v)) ? Number(v) : standard;
+  function rensStartverdier(v) {
+    return liste(v).filter((s) => s && typeof s.id === "string").map((s) => ({ id: s.id, verdi: tall2(s.verdi) }));
+  }
+  function rensAnalyse(a) {
+    a = a && typeof a === "object" ? a : {};
+    return {
+      lesbar: a.lesbar !== false,
+      tittel: tekst2(a.tittel) || "Uten tittel",
+      sammendrag: tekst2(a.sammendrag),
+      hovedpoenger: liste(a.hovedpoenger).map(tekst2).filter(Boolean),
+      temaer: liste(a.temaer).filter((t) => TEMA_IDER.includes(t)),
+      begreper: liste(a.begreper).filter((b) => b && b.begrep).map((b) => ({
+        begrep: tekst2(b.begrep),
+        forklaring: tekst2(b.forklaring),
+        eksempel: tekst2(b.eksempel),
+        tema: TEMA_IDER.includes(b.tema) ? b.tema : null
+      })),
+      grafer: liste(a.grafer).filter((g) => g && (MAL_IDER.includes(g.mal) || g.mal === "fri" && g.fri && typeof g.fri === "object")).map((g) => ({
+        mal: g.mal,
+        tittel: tekst2(g.tittel),
+        kobling: tekst2(g.kobling),
+        startverdier: rensStartverdier(g.startverdier),
+        fri: g.mal === "fri" ? {
+          xAkse: { navn: tekst2(g.fri.xAkse?.navn), min: tall2(g.fri.xAkse?.min), max: tall2(g.fri.xAkse?.max, 100) },
+          yAkse: { navn: tekst2(g.fri.yAkse?.navn), min: tall2(g.fri.yAkse?.min), max: tall2(g.fri.yAkse?.max, 100) },
+          parametre: liste(g.fri.parametre).map((p) => ({ id: tekst2(p.id), navn: tekst2(p.navn), min: tall2(p.min), max: tall2(p.max, 10), steg: tall2(p.steg, 1) || 1, start: tall2(p.start) })),
+          kurver: liste(g.fri.kurver).map((k) => ({ id: tekst2(k.id), navn: tekst2(k.navn), type: k.type === "loddrett" ? "loddrett" : "y_av_x", uttrykk: tekst2(k.uttrykk) })),
+          skjaeringer: liste(g.fri.skjaeringer).map((s) => ({ kurve1: tekst2(s.kurve1), kurve2: tekst2(s.kurve2), navn: tekst2(s.navn) }))
+        } : null
+      }))
+    };
+  }
+  function rensOppgaver(svar) {
+    return liste(svar?.oppgaver).map((o) => {
+      if (!o || !["flervalg", "regning", "drofting", "graf"].includes(o.type) || !o.sporsmal) return null;
+      const ut = {
+        type: o.type,
+        tema: TEMA_IDER.includes(o.tema) ? o.tema : "modeller",
+        sporsmal: tekst2(o.sporsmal),
+        alternativer: liste(o.alternativer).map(tekst2),
+        riktigAlternativ: Math.round(tall2(o.riktigAlternativ, -1)),
+        fasitTall: tall2(o.fasitTall),
+        enhet: tekst2(o.enhet),
+        toleranse: Math.abs(tall2(o.toleranse)),
+        losningsforslag: tekst2(o.losningsforslag),
+        vurderingskriterier: liste(o.vurderingskriterier).map(tekst2),
+        graf: null
+      };
+      if (ut.type === "flervalg" && (ut.alternativer.length < 2 || ut.riktigAlternativ < 0 || ut.riktigAlternativ >= ut.alternativer.length)) return null;
+      if (ut.type === "graf") {
+        const g = o.graf;
+        const mal = g && MALER[g.mal];
+        if (!mal || !mal.parametre.some((p) => p.id === g.riktigParameter)) return null;
+        ut.graf = { mal: g.mal, startverdier: rensStartverdier(g.startverdier), riktigParameter: g.riktigParameter, riktigRetning: g.riktigRetning === "ned" ? "ned" : "opp" };
+      }
+      return ut;
+    }).filter(Boolean);
+  }
+  function base64TilBlob(data, type) {
+    const bin = atob(data);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type });
+  }
+  settTransport({
+    async status() {
+      return { demo: false, artifact: true, lagring: lagringsType };
+    },
+    async post(url, data) {
+      if (url === "/api/analyser") {
+        const sample = await bruk("sample");
+        if (!sample) throw new Error("Claude er ikke tilgjengelig her. Åpne siden på claude.ai mens du er logget inn.");
+        const grenser = await sample.limits().catch(() => null);
+        if (!grenser?.images) throw new Error(FEILTEKST.images_unavailable);
+        const bilder = data.filer.map((f) => base64TilBlob(f.data, f.type));
+        if (bilder.length > grenser.images.maxCount) {
+          throw new Error(`Claude kan lese maks ${grenser.images.maxCount} bilder om gangen her. Del opp i flere innleveringer.`);
+        }
+        const prompt = `${FELLES}
+
+Bildene som følger med, er sider fra læreboka eller notatene mine.
+
+${analyseTekst(bilder.length, tekst2(data.notat).slice(0, 1e3))}${jsonInstruks(ANALYSE_SKJEMA)}`;
+        return { analyse: rensAnalyse(await spørClaude(prompt, { images: bilder })) };
+      }
+      if (url === "/api/oppgaver") {
+        const prompt = `${FELLES}
+
+${oppgaveTekst(tekst2(data.kontekst).slice(0, 15e4), data.antall, data.nivå)}${jsonInstruks(OPPGAVE_SKJEMA)}`;
+        const oppg = rensOppgaver(await spørClaude(prompt, { cache: false }));
+        if (!oppg.length) throw new Error("Claude laget ingen gyldige oppgaver. Prøv igjen.");
+        return { oppgaver: oppg };
+      }
+      if (url === "/api/vurder") {
+        if (!tekst2(data.svar).trim()) throw new Error("Skriv et svar først.");
+        const prompt = `${FELLES}
+
+${vurderingTekst({ ...data, svar: tekst2(data.svar).slice(0, 3e4) })}${jsonInstruks(VURDERING_SKJEMA)}`;
+        const v = await spørClaude(prompt);
+        return {
+          tilbakemelding: tekst2(v?.tilbakemelding),
+          styrker: liste(v?.styrker).map(tekst2),
+          forbedringer: liste(v?.forbedringer).map(tekst2),
+          karakter: Math.min(6, Math.max(1, Math.round(tall2(v?.karakter, 3)))),
+          modellsvar: tekst2(v?.modellsvar)
+        };
+      }
+      throw new Error(`Ukjent forespørsel: ${url}`);
+    }
+  });
+  var ClaudeTale = class extends NettleserTale {
+    constructor(tts, språk) {
+      super();
+      this.tts = tts;
+      this.språk = språk;
+      this.navn = "Claudes stemme";
+      tts.onState(({ state }) => {
+        this.status = state === "idle" ? "stoppet" : state === "paused" ? "pause" : "spiller";
+        this.vedEndring();
+      });
+    }
+    støttes() {
+      return true;
+    }
+    stemmer() {
+      return [];
+    }
+    velgStemme() {
+      return null;
+    }
+    fart() {
+      return Math.min(1.5, Math.max(0.7, this.hastighet));
+    }
+    les(tekstSomLeses) {
+      const linjer = this.delOpp(tekstSomLeses).map((t) => ({ text: t.trim(), ...this.språk ? { language: this.språk } : {} })).filter((l) => l.text);
+      this.status = "spiller";
+      this.vedEndring();
+      this.tts.speak(linjer, { rate: this.fart() }).catch((e) => {
+        if (e?.code === "not_granted") melding("Høytlesning er slått av for denne siden.");
+      });
+    }
+    pause() {
+      this.tts.pause().catch(() => {
+      });
+    }
+    fortsett() {
+      this.tts.resume().catch(() => {
+      });
+    }
+    stopp() {
+      if (this.tts.active?.()) this.tts.stop().catch(() => {
+      });
+      this.status = "stoppet";
+      this.vedEndring();
+    }
+    settHastighet(h) {
+      this.hastighet = h;
+      if (this.status !== "stoppet") this.tts.setRate(this.fart()).catch(() => {
+      });
+    }
+  };
+  async function velgTalemotor() {
+    if ("speechSynthesis" in window && speechSynthesis.getVoices().length === 0) {
+      await new Promise((r) => {
+        speechSynthesis.addEventListener("voiceschanged", r, { once: true });
+        setTimeout(r, 1500);
+      });
+    }
+    const harNorsk = "speechSynthesis" in window && speechSynthesis.getVoices().some((v) => /^(nb|no|nn)([-_]|$)/i.test(v.lang));
+    if (harNorsk) return;
+    const tts = await bruk("tts");
+    if (!tts) return;
+    const språk = await tts.languages?.().then((l) => ["nb", "no", "nb-NO"].find((x) => l.includes(x))).catch(() => void 0);
+    settTale(new ClaudeTale(tts, språk));
+  }
+  var linje = document.getElementById("talelinje");
+  var pauseKnapp = document.getElementById("tale-pause");
+  var hastighet = document.getElementById("tale-hastighet");
+  var hastighetVerdi = document.getElementById("tale-hastighet-verdi");
+  var visFart = (h) => {
+    hastighetVerdi.textContent = `${h.toLocaleString("nb-NO", { minimumFractionDigits: 1 })}×`;
+  };
+  function kobleTalelinje() {
+    try {
+      const lagret = JSON.parse(localStorage.getItem("tale") || "{}");
+      if (lagret.hastighet) tale.hastighet = lagret.hastighet;
+      if (lagret.stemme) tale.stemmeNavn = lagret.stemme;
+    } catch {
+    }
+    hastighet.value = tale.hastighet;
+    visFart(tale.hastighet);
+    tale.vedEndring = () => {
+      linje.hidden = tale.status === "stoppet";
+      pauseKnapp.textContent = tale.status === "pause" ? "▶ Fortsett" : "⏸ Pause";
+    };
+  }
+  pauseKnapp.addEventListener("click", () => tale.status === "pause" ? tale.fortsett() : tale.pause());
+  document.getElementById("tale-stopp").addEventListener("click", () => tale.stopp());
+  hastighet.addEventListener("input", () => {
+    const h = Number(hastighet.value);
+    visFart(h);
+    tale.settHastighet(h);
+    try {
+      localStorage.setItem("tale", JSON.stringify({ hastighet: h, stemme: tale.stemmeNavn }));
+    } catch {
+    }
+  });
+  kobleTalelinje();
+  main.innerHTML = '<div class="laster"><div class="spinner"></div><p>Laster faget ditt …</p></div>';
+  (async () => {
+    await settOppLagring();
+    if (lagringsType !== "claude") document.getElementById("lagring-banner").hidden = false;
+    await visRute("/oversikt");
+    velgTalemotor().then(kobleTalelinje).catch(() => {
+    });
+  })();
+})();
+
+</script>

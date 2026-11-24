@@ -1,8 +1,9 @@
 // Startsiden: oversikt over faget, temaene og alt du har levert.
 
-import { hentAlle } from '../db.js';
+import { hentAlle, lagre, nyId, leggTilBegreper } from '../db.js';
+import { demoAnalyse } from '../demo.js';
 import { TEMAER, temaNavn } from '../fag.js';
-import { esc, temaChips, dato } from '../ui.js';
+import { esc, temaChips, dato, naviger, melding } from '../ui.js';
 
 export async function vis(main, deler, query) {
   const [leveranser, begreper, sett] = await Promise.all([hentAlle('leveranser'), hentAlle('begreper'), hentAlle('oppgavesett')]);
@@ -32,7 +33,10 @@ export async function vis(main, deler, query) {
         <h2>Velkommen! 👋</h2>
         <p>Start med å levere inn en side fra læreboka eller notatene dine. Du kan bruke et bilde eller en PDF.</p>
         <p>Claude lager et sammendrag og finner temaer og begreper. Appen lager interaktive grafer og oppgaver du kan øve på.</p>
-        <a class="knapp" href="#/lever">📄 Lever din første side</a>
+        <div class="handlinger midt-rad">
+          <a class="knapp" href="#/lever">📄 Lever din første side</a>
+          <button class="knapp lys eksempel" type="button">Prøv med en eksempelside</button>
+        </div>
       </div>` : ''}
 
     <section class="kort">
@@ -65,4 +69,15 @@ export async function vis(main, deler, query) {
       </ul>`}
     </section>` : ''}
   `;
+
+  main.querySelector('.eksempel')?.addEventListener('click', async () => {
+    const id = nyId();
+    const analyse = demoAnalyse();
+    analyse.tittel = 'Eksempel: Den keynesianske modellen og finanspolitikk';
+    analyse.sammendrag = analyse.sammendrag.replace('Dette er et eksempel fra demo-modus. ', '');
+    await lagre('leveranser', { id, dato: Date.now(), notat: 'Eksempelside – kan slettes', filer: [], analyse });
+    await leggTilBegreper(analyse.begreper, id);
+    melding('Eksempelsiden er lagt til.', 'ok');
+    naviger(`/side/${id}`);
+  });
 }

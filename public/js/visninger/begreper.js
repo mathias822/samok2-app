@@ -2,7 +2,7 @@
 
 import { hentAlle, hent, lagre, slett, begrepNøkkel } from '../db.js';
 import { TEMAER, temaNavn } from '../fag.js';
-import { esc, html, lesHøytKnapp, melding } from '../ui.js';
+import { esc, html, lesHøytKnapp, melding, bekreft, skjemaDialog } from '../ui.js';
 
 export async function vis(main) {
   const leveranser = await hentAlle('leveranser');
@@ -51,7 +51,7 @@ export async function vis(main) {
       verktøy.appendChild(lesHøytKnapp(() => `${b.begrep}. ${b.forklaring} ${b.eksempel ? 'Eksempel: ' + b.eksempel : ''}`, ''));
       const slettKnapp = html('<button class="knapp liten lys" type="button" title="Slett begrepet">🗑</button>');
       slettKnapp.addEventListener('click', async () => {
-        if (!confirm(`Slette «${b.begrep}» fra ordlisten?`)) return;
+        if (!(await bekreft(`Slette «${b.begrep}» fra ordlisten?`, { ja: 'Slett', fare: true }))) return;
         await slett('begreper', b.nokkel);
         begreper = begreper.filter((x) => x.nokkel !== b.nokkel);
         tegn();
@@ -64,10 +64,13 @@ export async function vis(main) {
   søk.addEventListener('input', tegn);
   tema.addEventListener('change', tegn);
   main.querySelector('.ny').addEventListener('click', async () => {
-    const navn = prompt('Begrep:');
-    if (!navn?.trim()) return;
-    const forklaring = prompt('Forklaring:') || '';
-    const eksempel = prompt('Eksempel (valgfritt):') || '';
+    const svar = await skjemaDialog('Legg til eget begrep', [
+      { id: 'navn', navn: 'Begrep' },
+      { id: 'forklaring', navn: 'Forklaring', flerlinje: true },
+      { id: 'eksempel', navn: 'Eksempel (valgfritt)', flerlinje: true },
+    ]);
+    if (!svar?.navn) return;
+    const { navn, forklaring, eksempel } = svar;
     const nokkel = begrepNøkkel(navn);
     if (await hent('begreper', nokkel)) { melding('Begrepet finnes allerede.'); return; }
     const nytt = { nokkel, begrep: navn.trim(), forklaring, eksempel, temaer: tema.value ? [tema.value] : [], kilder: [], boks: 1, sistØvd: null, lagt: Date.now(), egendefinert: true };

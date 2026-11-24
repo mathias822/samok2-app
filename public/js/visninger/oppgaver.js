@@ -3,7 +3,7 @@
 import { hentAlle, hent, lagre, slett, nyId } from '../db.js';
 import { post } from '../api.js';
 import { TEMAER, temaNavn } from '../fag.js';
-import { esc, html, laster, lesHøytKnapp, dato, melding } from '../ui.js';
+import { esc, html, laster, lesHøytKnapp, dato, melding, naviger, bekreft } from '../ui.js';
 import { visGraf } from '../grafvisning.js';
 import { fmt } from '../grafmaler.js';
 
@@ -117,7 +117,7 @@ async function visOversikt(main, query) {
         kilder: valgte.map((v) => v.id),
         oppgaver: svar.oppgaver.map((o) => ({ ...o, id: nyId(), resultat: null })),
       });
-      location.hash = `#/oppgaver/${id}`;
+      naviger(`/oppgaver/${id}`);
     } catch (err) {
       status.innerHTML = `<p class="feiltekst">${esc(err.message)}</p>`;
       e.target.disabled = false;
@@ -306,8 +306,8 @@ async function visSett(main, settId) {
   }
 
   main.querySelector('.slett').addEventListener('click', async () => {
-    if (!confirm('Slette dette oppgavesettet og svarene dine?')) return;
+    if (!(await bekreft('Slette dette oppgavesettet og svarene dine?', { ja: 'Slett', fare: true }))) return;
     await slett('oppgavesett', sett.id);
-    location.hash = '#/oppgaver';
+    naviger('/oppgaver');
   });
 }

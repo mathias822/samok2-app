@@ -4,7 +4,8 @@
   "description": "Øvingsapp for Samfunnsøkonomi 2",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "bygg-nettside": "node artifact/bygg.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.13.0",
@@ -12,5 +13,8 @@
     "express": "^5.3.0",
     "plotly.js-dist-min": "^4.3.0"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
 }

@@ -4,7 +4,7 @@
 
 import { hentAlle, lagre } from '../db.js';
 import { TEMAER } from '../fag.js';
-import { esc, lesHøytKnapp } from '../ui.js';
+import { esc, lesHøytKnapp, naviger } from '../ui.js';
 
 const ØKT_STØRRELSE = 15;
 
@@ -28,7 +28,7 @@ export async function vis(main, deler, query) {
     <div class="bokser">${[1, 2, 3, 4, 5].map((n) => `<div><strong>${utvalg.filter((b) => b.boks === n).length}</strong><span>Boks ${n}</span></div>`).join('')}</div>
     <div class="flashflate"></div>`;
 
-  main.querySelector('.tema').addEventListener('change', (e) => { location.hash = `#/flashkort${e.target.value ? '?tema=' + e.target.value : ''}`; });
+  main.querySelector('.tema').addEventListener('change', (e) => { naviger(`/flashkort${e.target.value ? '?tema=' + e.target.value : ''}`); });
 
   const flate = main.querySelector('.flashflate');
   if (!utvalg.length) {

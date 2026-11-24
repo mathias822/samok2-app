@@ -1,7 +1,7 @@
 // Viser én levert side: filene, sammendrag, hovedpoenger, begreper og grafer.
 
 import { hent, slett, fjernKildeFraBegreper } from '../db.js';
-import { esc, html, lesHøytKnapp, temaChips, dato, melding } from '../ui.js';
+import { esc, html, lesHøytKnapp, temaChips, dato, melding, naviger, bekreft } from '../ui.js';
 import { visGraf } from '../grafvisning.js';
 
 export async function vis(main, [id]) {
@@ -46,7 +46,8 @@ export async function vis(main, [id]) {
   main.querySelector('.les-poeng').appendChild(lesHøytKnapp(() => a.hovedpoenger.join(' ')));
 
   const filListe = main.querySelector('.fil-liste');
-  for (const f of l.filer) {
+  if (!l.filer.some((f) => f.blob)) filListe.innerHTML = '<p class="dempet">Ingen filer lagret.</p>';
+  for (const f of l.filer.filter((x) => x.blob)) {
     const url = URL.createObjectURL(f.blob);
     filListe.appendChild(html(f.type === 'application/pdf'
       ? `<a class="fil-pdf" href="${url}" target="_blank" rel="noopener">📄 ${esc(f.navn)}</a>`
@@ -57,10 +58,10 @@ export async function vis(main, [id]) {
   for (const g of a.grafer || []) visGraf(grafBeholder, g);
 
   main.querySelector('.slett').addEventListener('click', async () => {
-    if (!confirm('Vil du slette denne siden? Begreper som bare kommer fra denne siden, slettes også.')) return;
+    if (!(await bekreft('Vil du slette denne siden? Begreper som bare kommer fra denne siden, slettes også.', { ja: 'Slett', fare: true }))) return;
     await slett('leveranser', l.id);
     await fjernKildeFraBegreper(l.id);
     melding('Siden er slettet.');
-    location.hash = '#/oversikt';
+    naviger('/oversikt');
   });
 }

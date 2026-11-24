@@ -96,6 +96,9 @@ export function visGraf(beholder, graf, valg = {}) {
   }
 
   function tegn() {
+    const stil = getComputedStyle(document.body);
+    const tekstFarge = stil.getPropertyValue('--tekst').trim() || '#1f2937';
+    const rutenett = stil.getPropertyValue('--rutenett').trim() || '#eef0f3';
     const A = mal.beregn(start);
     const B = mal.beregn(nå);
     const endret = erEndret();
@@ -120,34 +123,32 @@ export function visGraf(beholder, graf, valg = {}) {
     const shapes = [];
     const annotations = [];
     const etikett = (x, y, tekst, farge, ax, ay) => ({ x, y, text: tekst, showarrow: true, arrowhead: 0, arrowcolor: farge, ax, ay,
-      bgcolor: 'rgba(255,255,255,0.92)', bordercolor: farge, borderpad: 3, borderwidth: 1, font: { size: 12, color: farge } });
+      bgcolor: stil.getPropertyValue('--kort').trim() || 'white', bordercolor: farge, borderpad: 3, borderwidth: 1, font: { size: 12, color: farge } });
     if (endret && vis) {
       const gamle = A.punkter.filter((p) => !p.bi);
       spor.push({ x: gamle.map((p) => p.x), y: gamle.map((p) => p.y), mode: 'markers', name: 'Før', showlegend: false,
-        marker: { size: 11, color: 'white', line: { color: FØR_FARGE, width: 2.5 } },
+        marker: { size: 11, color: stil.getPropertyValue('--kort').trim() || 'white', line: { color: FØR_FARGE, width: 2.5 } },
         hovertemplate: `Før<br>%{x:.1f}, %{y:.1f}<extra></extra>` });
-      for (const p of gamle) annotations.push(etikett(p.x, p.y, 'Før', '#6b7280', -34, 30));
+      for (const p of gamle) annotations.push(etikett(p.x, p.y, 'Før', FØR_FARGE, -34, 30));
     }
     const nye = B.punkter;
     spor.push({ x: nye.map((p) => p.x), y: nye.map((p) => p.y), mode: 'markers', name: 'Punkter', text: nye.map((p) => p.navn), showlegend: false,
-      marker: { size: nye.map((p) => (p.bi ? 9 : 13)), color: nye.map((p) => (p.bi ? '#7c3aed' : '#111827')), line: { color: 'white', width: 2 } },
+      marker: { size: nye.map((p) => (p.bi ? 9 : 13)), color: nye.map((p) => (p.bi ? '#7c3aed' : tekstFarge)), line: { color: stil.getPropertyValue('--kort').trim() || 'white', width: 2 } },
       hovertemplate: `%{text}<br>${esc(mal.akser.x)}: %{x:.2f}<br>${esc(mal.akser.y)}: %{y:.2f}<extra></extra>` });
     for (const p of nye) {
       const tekst = endret && vis && !p.bi && p.navn === 'Likevekt' ? 'Ny likevekt' : p.navn;
-      annotations.push(etikett(p.x, p.y, tekst, p.bi ? '#7c3aed' : '#111827', 36, -32));
+      annotations.push(etikett(p.x, p.y, tekst, p.bi ? '#7c3aed' : tekstFarge, 36, -32));
     }
     for (const p of nye) {
       shapes.push({ type: 'line', x0: p.x, x1: p.x, y0: område.y[0], y1: p.y, line: { color: '#6b7280', width: 1, dash: 'dot' } });
       shapes.push({ type: 'line', x0: område.x[0], x1: p.x, y0: p.y, y1: p.y, line: { color: '#6b7280', width: 1, dash: 'dot' } });
     }
 
-    const mørk = document.documentElement.dataset.tema === 'mork';
-    const tekstFarge = mørk ? '#e5e7eb' : '#1f2937';
     const layout = {
-      margin: { l: 60, r: 16, t: 16, b: 50 },
-      xaxis: { title: { text: mal.akser.x }, range: område.x, fixedrange: true, zeroline: true, gridcolor: mørk ? '#374151' : '#eef0f3' },
-      yaxis: { title: { text: mal.akser.y }, range: område.y, fixedrange: true, zeroline: true, gridcolor: mørk ? '#374151' : '#eef0f3' },
-      legend: { orientation: 'h', y: -0.22, font: { size: 11 } },
+      margin: { l: 60, r: 16, t: 16, b: 56 },
+      xaxis: { title: { text: mal.akser.x }, range: område.x, fixedrange: true, zeroline: true, gridcolor: rutenett },
+      yaxis: { title: { text: mal.akser.y }, range: område.y, fixedrange: true, zeroline: true, gridcolor: rutenett },
+      legend: { orientation: 'h', y: -0.3, yanchor: 'top', font: { size: 11 } },
       shapes,
       annotations,
       paper_bgcolor: 'rgba(0,0,0,0)',
@@ -168,7 +169,7 @@ export function visGraf(beholder, graf, valg = {}) {
       const pil = diff == null || Math.abs(diff) < 1e-9 ? '' : diff > 0 ? '▲' : '▼';
       return `<tr><td>${esc(v.navn)}</td>${endret ? `<td class="tall">${fmt(før, d)}</td>` : ''}<td class="tall"><strong>${fmt(v.verdi, d)}</strong></td>${endret ? `<td class="tall endring">${pil} ${diff == null || Math.abs(diff) < 1e-9 ? '–' : (diff > 0 ? '+' : '') + fmt(diff, d)}</td>` : ''}</tr>`;
     }).join('');
-    const tabell = `<table class="nokkeltall"><thead><tr><th></th>${endret ? '<th>Før</th><th>Nå</th><th>Endring</th>' : '<th>Verdi</th>'}</tr></thead><tbody>${rader}</tbody></table>`;
+    const tabell = `<div class="tabell-ramme"><table class="nokkeltall"><thead><tr><th></th>${endret ? '<th>Før</th><th>Nå</th><th>Endring</th>' : '<th>Verdi</th>'}</tr></thead><tbody>${rader}</tbody></table></div>`;
 
     let tekst = '';
     if (!endret) {

@@ -2,7 +2,7 @@
 
 import { post } from '../api.js';
 import { lagre, nyId, leggTilBegreper } from '../db.js';
-import { esc, html, laster, melding } from '../ui.js';
+import { esc, html, laster, melding, naviger } from '../ui.js';
 
 const MAKS_SIDE = 1800; // bilder skaleres ned til maks 1800 piksler på lengste side (raskere og billigere)
 
@@ -19,6 +19,29 @@ async function forberedBilde(fil) {
   ctx.fillRect(0, 0, lerret.width, lerret.height);
   ctx.drawImage(bilde, 0, 0, lerret.width, lerret.height);
   return new Promise((resolve) => lerret.toBlob((b) => resolve(b), 'image/jpeg', 0.85));
+}
+
+const MAKS_PDF_SIDER = 20;
+
+// Gjør hver side i en PDF om til et JPEG-bilde (brukes bare når pdf.js er lastet).
+async function pdfTilBilder(fil) {
+  const pdf = await window.pdfjsLib.getDocument({ data: new Uint8Array(await fil.arrayBuffer()) }).promise;
+  if (pdf.numPages > MAKS_PDF_SIDER) melding(`PDF-en har ${pdf.numPages} sider. Bare de ${MAKS_PDF_SIDER} første tas med.`);
+  const bilder = [];
+  for (let n = 1; n <= Math.min(pdf.numPages, MAKS_PDF_SIDER); n++) {
+    const side = await pdf.getPage(n);
+    const v0 = side.getViewport({ scale: 1 });
+    const viewport = side.getViewport({ scale: Math.min(2.5, MAKS_SIDE / Math.max(v0.width, v0.height)) });
+    const lerret = document.createElement('canvas');
+    lerret.width = Math.round(viewport.width);
+    lerret.height = Math.round(viewport.height);
+    const ctx = lerret.getContext('2d');
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, lerret.width, lerret.height);
+    await side.render({ canvasContext: ctx, viewport }).promise;
+    bilder.push(await new Promise((resolve) => lerret.toBlob(resolve, 'image/jpeg', 0.85)));
+  }
+  return bilder;
 }
 
 function tilBase64(blob) {
@@ -74,7 +97,15 @@ export async function vis(main) {
 
   async function leggTil(filer) {
     for (const fil of filer) {
-      if (fil.type === 'application/pdf') {
+      if (fil.type === 'application/pdf' && window.pdfjsLib) {
+        // Nettsideversjonen: PDF-sidene gjøres om til bilder før de sendes til Claude.
+        try {
+          const sider = await pdfTilBilder(fil);
+          sider.forEach((blob, i) => valgte.push({ navn: `${fil.name} – side ${i + 1}`, type: blob.type, blob, url: URL.createObjectURL(blob) }));
+        } catch {
+          melding(`Klarte ikke å lese PDF-en ${fil.name}.`, 'feil');
+        }
+      } else if (fil.type === 'application/pdf') {
         if (fil.size > 25_000_000) { melding(`${fil.name} er for stor (maks 25 MB).`, 'feil'); continue; }
         valgte.push({ navn: fil.name, type: fil.type, blob: fil, url: URL.createObjectURL(fil) });
       } else if (fil.type.startsWith('image/')) {
@@ -115,7 +146,7 @@ export async function vis(main) {
       });
       const nye = await leggTilBegreper(analyse.begreper, id);
       melding(`Ferdig! ${nye} nye begreper lagt til i ordlisten.`, 'ok');
-      location.hash = `#/side/${id}`;
+      naviger(`/side/${id}`);
     } catch (e) {
       statusBoks.innerHTML = `<p class="feiltekst">${esc(e.message)}</p>`;
       knapp.disabled = false;

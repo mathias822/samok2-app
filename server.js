@@ -9,7 +9,7 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { analyserSider, lagOppgaver, vurderSvar, BrukerFeil, MODELL } from './server/claude.js';
-import { demoAnalyse, demoOppgaver, demoVurdering } from './server/demo.js';
+import { demoAnalyse, demoOppgaver, demoVurdering } from './public/js/demo.js';
 
 const mappe = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT) || 3000;

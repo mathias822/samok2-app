@@ -1,4 +1,4 @@
-// Demo-modus: Ferdige eksempelsvar, slik at du kan prøve appen uten API-nøkkel (og uten å betale).
+// Eksempelsvar: brukes i demo-modus (uten API-nøkkel) og for «Prøv med en eksempelside».
 // Slås på automatisk når det ikke finnes noen API-nøkkel, eller med DEMO=1 i .env.
 
 export function demoAnalyse() {

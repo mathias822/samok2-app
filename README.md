@@ -10,6 +10,15 @@ En øvingsapp for faget **Samfunnsøkonomi 2** (videregående, LK20). Den kjøre
 
 ---
 
+## Enklest: Bruk nettsideversjonen på claude.ai
+Appen finnes også som en nettside på claude.ai: **https://claude.ai/artifact/38Bj7RVJWWUHTanMF3V7yC**
+Du trenger ikke å installere noe eller ha en API-nøkkel. Claude brukes via innloggingen din, og bruken teller mot Claude-abonnementet ditt. Dataene lagres privat på kontoen din.
+Nettsiden bygges fra den samme koden med `npm run bygg-nettside` (se mappen `artifact/`).
+
+Resten av denne README-en gjelder den lokale versjonen, som kjører på din egen PC med egen API-nøkkel.
+
+---
+
 ## Første gang: Slik setter du opp appen (Windows)
 
 ### 1. Installer Node.js

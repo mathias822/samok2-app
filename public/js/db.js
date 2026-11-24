@@ -41,21 +41,26 @@ async function tabell(navn, modus = 'readonly') {
   return db.transaction(navn, modus).objectStore(navn);
 }
 
-export async function hentAlle(navn) {
-  return løfte((await tabell(navn)).getAll());
-}
-export async function hent(navn, id) {
-  return løfte((await tabell(navn)).get(id));
-}
-export async function lagre(navn, objekt) {
-  return løfte((await tabell(navn, 'readwrite')).put(objekt));
-}
-export async function slett(navn, id) {
-  return løfte((await tabell(navn, 'readwrite')).delete(id));
-}
-export async function tøm(navn) {
-  return løfte((await tabell(navn, 'readwrite')).clear());
-}
+// Standard lagring: IndexedDB i nettleseren.
+// En annen lagring (f.eks. Claude-nettsidens database) kan kobles inn med settLagring().
+const indexedDbLagring = {
+  hentAlle: async (navn) => løfte((await tabell(navn)).getAll()),
+  hent: async (navn, id) => løfte((await tabell(navn)).get(id)),
+  lagre: async (navn, objekt) => løfte((await tabell(navn, 'readwrite')).put(objekt)),
+  slett: async (navn, id) => løfte((await tabell(navn, 'readwrite')).delete(id)),
+  tøm: async (navn) => løfte((await tabell(navn, 'readwrite')).clear()),
+};
+
+let lagring = indexedDbLagring;
+export function settLagring(ny) { lagring = ny; }
+
+export const NØKKELFELT = { leveranser: 'id', begreper: 'nokkel', oppgavesett: 'id', innstillinger: 'id' };
+
+export function hentAlle(navn) { return lagring.hentAlle(navn); }
+export function hent(navn, id) { return lagring.hent(navn, id); }
+export function lagre(navn, objekt) { return lagring.lagre(navn, objekt); }
+export function slett(navn, id) { return lagring.slett(navn, id); }
+export function tøm(navn) { return lagring.tøm(navn); }
 
 export function nyId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);

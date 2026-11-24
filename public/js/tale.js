@@ -51,7 +51,7 @@ class NettleserTale {
   }
 
   les(tekst) {
-    if (!this.støttes()) { alert('Nettleseren din støtter ikke høytlesning. Prøv Microsoft Edge eller Google Chrome.'); return; }
+    if (!this.støttes()) { console.warn('Nettleseren støtter ikke høytlesning.'); return; }
     this.stopp();
     this.biter = this.delOpp(tekst);
     this.indeks = 0;
@@ -115,4 +115,12 @@ class NettleserTale {
 }
 
 // ---- Her velges talemotoren. Bytt ut denne linjen for å koble på en annen tjeneste. ----
-export const tale = new NettleserTale();
+export { NettleserTale };
+export let tale = new NettleserTale();
+export function settTale(ny) {
+  ny.vedEndring = tale.vedEndring;
+  ny.hastighet = tale.hastighet;
+  ny.stemmeNavn = tale.stemmeNavn;
+  tale.stopp();
+  tale = ny;
+}
